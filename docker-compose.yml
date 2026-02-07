@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  fiwstory-test:
+    build: .
+    container_name: fiwstory-mod-test
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/tmp/.docker.xauth
+      - GRADLE_OPTS=-Xmx2g
+      - MINECRAFT_OPTS=-Xmx2G -Xms1G
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY}:/tmp/.docker.xauth:rw
+      - ./build:/app/build
+      - ./run:/app/run
+    network_mode: host
+    stdin_open: true
+    tty: true
