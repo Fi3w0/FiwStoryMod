@@ -1,0 +1,38 @@
+# Gradle
+.gradle/
+build/
+bin/
+out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Minecraft
+run/
+eclipse/
+
+# Logs
+logs/
+*.log
+
+# Dependencies
+dependencies/
+
+# Local configuration
+local.properties
+gradle.properties.local
+
+# Fabric
+remappedSrc/
+remappedBin/
