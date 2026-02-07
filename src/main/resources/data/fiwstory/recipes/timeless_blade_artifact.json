@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " T ",
+    " D ",
+    " N "
+  ],
+  "key": {
+    "T": {
+      "item": "fiwstory:temporal_structure_artifact"
+    },
+    "D": {
+      "item": "fiwstory:pharaoh_dagger_artifact"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "item": "fiwstory:timeless_blade_artifact",
+    "count": 1
+  }
+}

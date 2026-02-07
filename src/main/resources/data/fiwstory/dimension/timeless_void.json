@@ -1,0 +1,12 @@
+{
+  "type": "fiwstory:timeless_void",
+  "generator": {
+    "type": "minecraft:noise",
+    "seed": 0,
+    "settings": "fiwstory:timeless_void",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "fiwstory:timeless_void"
+    }
+  }
+}

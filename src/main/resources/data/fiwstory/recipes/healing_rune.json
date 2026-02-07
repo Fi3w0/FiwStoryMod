@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "EME",
+    "MHM",
+    "EME"
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:emerald_block"
+    },
+    "M": {
+      "item": "fiwstory:pure_mix"
+    },
+    "H": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "result": {
+    "item": "fiwstory:healing_rune",
+    "count": 1
+  }
+}

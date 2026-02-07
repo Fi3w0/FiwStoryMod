@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "fiwstory:philosopher_stone_artifact"
+    },
+    {
+      "item": "minecraft:netherite_ingot"
+    }
+  ],
+  "result": {
+    "item": "fiwstory:philosopher_stone_upgraded_artifact",
+    "count": 1
+  }
+}

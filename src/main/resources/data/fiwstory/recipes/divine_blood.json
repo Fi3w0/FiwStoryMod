@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "fiwstory:pure_crystal"
+    },
+    "G": {
+      "item": "minecraft:enchanted_golden_apple"
+    },
+    "C": {
+      "item": "minecraft:golden_carrot"
+    },
+    "N": {
+      "item": "minecraft:nether_wart"
+    },
+    "D": {
+      "item": "minecraft:dragon_breath"
+    },
+    "B": {
+      "item": "minecraft:glass_bottle"
+    },
+    "S": {
+      "item": "minecraft:glistering_melon_slice"
+    }
+  },
+  "pattern": [
+    "PGS",
+    "CND",
+    " B "
+  ],
+  "result": {
+    "item": "fiwstory:divine_blood",
+    "count": 1
+  }
+}

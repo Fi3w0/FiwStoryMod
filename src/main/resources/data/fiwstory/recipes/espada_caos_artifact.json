@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    " S ",
+    " N "
+  ],
+  "key": {
+    "C": {
+      "item": "fiwstory:chaos_gem_artifact"
+    },
+    "S": {
+      "item": "minecraft:netherite_sword"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "item": "fiwstory:espada_caos_artifact",
+    "count": 1
+  }
+}
