@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "fiwstory",
+  "version": "${version}",
+  "name": "Fiw Story [BETA]",
+  "description": "Gods, powers and artifacts - Mystery and discovery await",
+  "authors": [
+    "Fi3w0"
+  ],
+  "contact": {
+    "homepage": "https://example.com/",
+    "sources": "https://example.com/"
+  },
+  "license": "All Rights Reserved",
+  "icon": "assets/fiwstory/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.fiw.fiwstory.FiwstoryMod"
+    ],
+    "client": [
+      "com.fiw.fiwstory.FiwstoryModClient"
+    ]
+  },
+  "mixins": [
+    "fiwstory.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "~${minecraft_version}"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
