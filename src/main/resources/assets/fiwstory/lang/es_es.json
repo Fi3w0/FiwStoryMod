@@ -1,10 +1,11 @@
 {
+  "mod.description": "⚠️ MOD PERSONAL SMP - Código 100% AI - Texturas terceros",
   "item.fiwstory.cursed_spear_of_fi3w0": "Lanza Devora Almas",
   "item.fiwstory.corrupted_crystal": "Cristal Corrupto",
   "item.fiwstory.pharaoh_scarab_artifact": "Escarabajo del Faraón",
   "item.fiwstory.chaos_gem_artifact": "Gema del Lord de Caos",
   "item.fiwstory.blood_gem_artifact": "Gema de Sangre Divina",
-  "itemgroup.fiwstory.main": "Fiw Story",
+  "itemgroup.fiwstory.main": "Fiw Story [PERSONAL]",
   "item.fiwstory.cursed_spear_of_fi3w0.tooltip.line1": "Lanza forjada en el Vacío Atemporal",
   "item.fiwstory.cursed_spear_of_fi3w0.tooltip.line2": "Click derecho para devorar almas",
   "item.fiwstory.cursed_spear_of_fi3w0.tooltip.line3": "Daño: 10 | Lanza gigante",
