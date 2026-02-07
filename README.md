@@ -1,196 +1,254 @@
-# Fiw Story Mod
+# Fiw Story Mod - Mi Mod Personal para SMP
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-green.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.92.7-blue.svg)](https://fabricmc.net/)
-[![Mod Version](https://img.shields.io/badge/Version-1.3.33-orange.svg)](https://github.com/Fi3w0/FiwStoryMod/releases)
-[![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.3.33-orange.svg)](https://github.com/Fi3w0/FiwStoryMod)
+[![Estado](https://img.shields.io/badge/Estado-Personal%20SMP-yellow.svg)](https://github.com/Fi3w0/FiwStoryMod)
 
-**Fiw Story** is a comprehensive Minecraft mod that introduces a deep progression system centered around corruption, divine artifacts, and powerful abilities. Journey through a world of gods, ancient powers, and mysterious artifacts as you balance corruption and purity.
+**⚠️ ADVERTENCIA IMPORTANTE ⚠️**
 
-## ✨ Features
+Este es mi **mod personal** creado específicamente para mi servidor SMP de Minecraft. **NO** es un mod público profesional ni está pensado para uso general.
 
-### 🎮 Core Systems
+## 📋 Avisos Críticos
 
-#### **Corruption System**
-- **5 Corruption Levels** with progressive effects
-- **Corruption Sources**: Artifacts, combat, exploration
-- **Purification Mechanics**: Crystals, rituals, items
-- **Immunity System**: Temporary protection from corruption
-- **Visual Indicators**: Particle effects, HUD elements
+### 🚫 Copyright de Texturas
+- **TODAS las texturas** están cogidas de otros sitios/recursos
+- **NO tengo derechos** sobre ninguna textura
+- Si algún autor me contacta por copyright, **eliminaré inmediatamente** las texturas problemáticas
+- Uso únicamente para **propósitos personales y no comerciales**
 
-#### **Artifact Collection**
-- **Legendary Items**: Each with unique lore and abilities
-- **Soulbound System**: Keep artifacts through death
-- **Progressive Unlocking**: Discover artifacts through gameplay
-- **Custom Models & Textures**: High-quality 3D models
+### 🤖 Código 100% Generado por IA
+- **0% ayuda humana** en el código - puro vibecoding
+- **TODO el código** hecho por AI (OpenCode CLI + DeepSeek V3.2 API)
+- **90% del proyecto** desarrollado mediante vibecodding
+- **FiwLib**: Biblioteca personal con utilidades para el mod
+- **Expectativa de bugs**: Muchas mecánicas pueden fallar o no funcionar
 
-### ⚔️ Combat & Abilities
+### 🎮 Propósito Específico
+- **NO** hecho para jugar solo o sin ayuda de admin
+- **Diseñado específicamente** para el lore de mi servidor personal
+- **NO** para uso en modpacks o mundo vanilla
+- **Implementaciones de lore** específicas del SMP
+- **Usuario normal no entenderá nada** del contexto/lore
 
-#### **Cursed Spear of Fi3w0**
-- **Dash Riptide**: 1.5s cooldown dash ability
-  - Click right to dash in look direction
-  - Cooldown reduction on enemy hits (-0.5s)
-  - Corruption boost: +0.6 strength, +3 blocks range at 100% corruption
-  - Visual trail effects during dash
+### 🌍 Idioma y Soporte
+- **Traducción solo en español**
+- **Sin soporte técnico** - uso bajo tu propio riesgo
+- **Mecánicas desbalanceadas** intencionalmente
+- **Bugs esperados** - código generado por AI
 
-- **World Barrage**: 10s cooldown ultimate ability
-  - Shift + Right Click for 12 rotating slashes
-  - Teleportation to target location
-  - PvP balanced: Reduced damage against players
-  - Kill rewards: Regeneration II, Strength II, Speed I
-  - Requires Fi3w0 Glasses to activate
+## 🎭 Contenido del Mod (Para Contexto de Lore del SMP)
 
-#### **Fi3w0 Glasses**
-- **Custom 3D Model**: Wearable artifact
-- **Ability Enabler**: Required for World Barrage
-- **Visual Effects**: Special rendering when equipped
+### ⚠️ ADVERTENCIA: Todo esto es parte del lore específico de MI SMP
 
-### 🏰 Dimension & Exploration
+#### **Sistema de Corrupción (Lore del Server)**
+- **5 Niveles de Corrupción** - Progresión narrativa del lore
+- **Fuentes de Corrupción**: Artefactos, combate (contexto SMP)
+- **Mecánicas de Purificación**: Cristales, rituales (lore específico)
+- **Sistema de Inmunidad**: Protección temporal (balanceado para SMP)
+- **Indicadores Visuales**: Partículas, elementos HUD
 
-#### **Timeless Void Dimension**
-- **Custom Dimension**: Infinite void with floating islands
-- **Void Teleportation**: `/void` command access
-- **Particle Effects**: Custom void particles
-- **Safe Environment**: No mobs, peaceful exploration
+#### **Colección de Artefactos (Lore Personal)**
+- **Items "Legendarios"**: Cada uno con lore específico del SMP
+- **Sistema Soulbound**: Mantener artefactos tras muerte (para SMP)
+- **Desbloqueo Progresivo**: Descubrir mediante gameplay del server
+- **Modelos Personalizados**: Algunos con modelos 3D
 
-### 🛡️ Artifact Arsenal
+### ⚔️ Combate y Habilidades (Desbalanceado Intencionalmente)
 
-#### **Egyptian Artifacts**
-- **Pharaoh's Dagger**: Ancient ceremonial blade
-- **Scarab Artifact**: Symbol of rebirth and protection
-- **Pharaoh's Ring**: Royal authority and power
+#### **Lanza Maldita de Fi3w0**
+- **Dash Riptide**: 1.5s cooldown (puede fallar)
+  - Click derecho para dash en dirección de mirada
+  - Reducción de cooldown al golpear enemigos (-0.5s)
+  - Boost de corrupción: +0.6 fuerza, +3 bloques al 100%
+  - Efectos visuales durante dash
 
-#### **Divine & Chaotic Artifacts**
-- **Fallen God's Heart**: Divine power source
-- **Chaos Gem**: Unstable chaotic energy
-- **Blood Gem**: Life force manipulation
-- **Espada del Caos**: Sword of chaos and destruction
+- **World Barrage**: 10s cooldown (requiere gafas)
+  - Shift + Click derecho para 12 slashes rotativos
+  - Teletransporte a ubicación objetivo
+  - **NO balanceado para PvP** - daño reducido contra jugadores
+  - Recompensas por matar: Regeneración II, Fuerza II, Velocidad I
 
-#### **Utility Artifacts**
-- **Philosopher's Stone**: Alchemical transformation
-- **Temporal Structure**: Time manipulation
-- **Healing Rune**: Restoration magic
-- **Pure Crystal**: Corruption purification
+#### **Gafas de Fi3w0**
+- **Modelo 3D Personalizado**: Artefacto usable
+- **Habilitador de Habilidad**: Requerido para World Barrage
+- **Efectos Visuales**: Renderizado especial al equipar
 
-## 🚀 Installation
+### 🏰 Dimensión y Exploración (Solo para Lore)
 
-### Requirements
+#### **Dimensión Timeless Void**
+- **Dimensión Personalizada**: Vacío infinito con islas flotantes
+- **Teletransporte Void**: Comando `/void`
+- **Efectos de Partículas**: Partículas void personalizadas
+- **Entorno Seguro**: Sin mobs, exploración pacífica
+
+### 🛡️ Arsenal de Artefactos (Lore Específico)
+
+#### **Artefactos Egipcios (Parte del Lore)**
+- **Daga del Faraón**: Hoja ceremonial antigua
+- **Artefacto Escarabajo**: Símbolo de renacimiento
+- **Anillo del Faraón**: Autoridad real
+
+#### **Artefactos Divinos y Caóticos**
+- **Corazón del Dios Caído**: Fuente de poder divino
+- **Gema del Caos**: Energía caótica inestable
+- **Gema de Sangre**: Manipulación de fuerza vital
+- **Espada del Caos**: Espada de caos y destrucción
+
+#### **Artefactos de Utilidad**
+- **Piedra Filosofal**: Transformación alquímica
+- **Estructura Temporal**: Manipulación del tiempo
+- **Runa de Curación**: Magia de restauración
+- **Cristal Puro**: Purificación de corrupción
+
+## ⚠️ Instalación (Bajo Tu Propio Riesgo)
+
+### Requisitos
 - **Minecraft**: 1.20.1
 - **Fabric Loader**: 0.18.3+
 - **Fabric API**: 0.92.7+
 - **Java**: 21
 
-### Installation Steps
-1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.20.1
-2. Download [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
-3. Download the latest Fiw Story mod from [Releases](https://github.com/Fi3w0/FiwStoryMod/releases)
-4. Place the `.jar` file in your `mods` folder
-5. Launch Minecraft with Fabric profile
+### Pasos de Instalación (NO RECOMENDADO)
+1. Instalar [Fabric Loader](https://fabricmc.net/use/) para Minecraft 1.20.1
+2. Descargar [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
+3. **NO hay releases oficiales** - debes compilar tú mismo
+4. Colocar el `.jar` en tu carpeta `mods`
+5. Iniciar Minecraft con perfil Fabric
 
-## 📖 Usage & Commands
+## 🎮 Uso y Comandos (Contexto SMP)
 
-### In-Game Commands
-- `/corruption [player]` - Check corruption level
-- `/immunity [player] [duration]` - Grant corruption immunity
-- `/void` - Teleport to Timeless Void dimension
-- `/bind` - Soulbind current held item
+### Comandos In-Game (Pueden Fallar)
+- `/corruption [jugador]` - Ver nivel de corrupción (lore)
+- `/immunity [jugador] [duración]` - Dar inmunidad temporal
+- `/void` - Teletransporte a dimensión Timeless Void
+- `/bind` - Soulbind del item actualmente sostenido
 
-### Gameplay Tips
-1. **Start Slow**: Begin with low-corruption artifacts
-2. **Balance Corruption**: Use purification items regularly
-3. **Master Abilities**: Practice dash and barrage timing
-4. **Explore Dimensions**: Discover hidden artifacts in the Timeless Void
-5. **PvP Strategy**: Use reduced-damage abilities against players
+### ⚠️ Advertencias de Gameplay
+1. **NO empieces** si no entiendes el lore del SMP
+2. **Mecánicas desbalanceadas** intencionalmente
+3. **Habilidades pueden fallar** - código AI
+4. **Exploración sin contexto** no tendrá sentido
+5. **PvP NO balanceado** - hecho para lore, no competitivo
 
-## 🛠️ Development
+## 🔧 Desarrollo (Vibecoding Puro)
 
-### Building from Source
+### Compilación desde Fuente
 ```bash
-# Clone the repository
+# Clonar el repositorio
 git clone https://github.com/Fi3w0/FiwStoryMod.git
 
-# Build the mod
+# Compilar el mod (puede fallar)
 ./gradlew build
 
-# Output will be in build/libs/
+# Salida en build/libs/
 ```
 
-### Project Structure
+### Estructura del Proyecto (Generada por AI)
 ```
 src/main/java/com/fiw/fiwstory/
-├── item/              # Custom items and artifacts
-├── event/             # Event handlers
-├── data/              # Persistent data systems
-├── effect/            # Status effects
-├── command/           # Custom commands
-├── dimension/         # Custom dimensions
-├── client/            # Client-side rendering
-└── lib/               # Utility libraries
+├── item/              # Items personalizados y artefactos
+├── event/             # Manejadores de eventos
+├── data/              # Sistemas de datos persistentes
+├── effect/            # Efectos de estado
+├── command/           # Comandos personalizados
+├── dimension/         # Dimensiones personalizadas
+├── client/            # Renderizado cliente
+└── lib/               # FiwLib - biblioteca de utilidades
 ```
 
-### Dependencies
+### Dependencias
 - **Fabric Loom**: 1.5-SNAPSHOT
 - **Fabric API**: 0.92.7+1.20.1
 - **Yarn Mappings**: 1.20.1+build.10
 
-## 🤝 Contributing
+## 🔄 Contribuciones (Reglas Estrictas)
 
-We welcome contributions! Please follow these steps:
+### ⚠️ REGLAS IMPORTANTES:
+1. **NO modificar la rama `main`** directamente
+2. **Cualquier persona puede hacer cambios** en otra rama que no sea `main`
+3. **Pull Requests serán revisados** pero no garantizados
+4. **Respetar que es un proyecto personal** para mi SMP
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### Proceso de Contribución
+1. **Fork del repositorio** (si quieres)
+2. **Crear una rama feature** (`git checkout -b mi-cambio`)
+3. **Commit de cambios** (`git commit -m 'Descripción'`)
+4. **Push a la rama** (`git push origin mi-cambio`)
+5. **Abrir Pull Request** para revisión
 
-### Code Style
-- Follow existing code conventions
-- Add comments for complex logic
-- Include JavaDoc for public methods
-- Test changes thoroughly
+### Estilo de Código (Generado por AI)
+- **Seguir convenciones existentes** (las que haya)
+- **Código puede ser desorganizado** - hecho por AI
+- **Sin garantías de funcionamiento**
+- **NO hay testing** - uso bajo tu propio riesgo
 
-## 📄 License
+## 📄 Licencia y Avisos Legales
 
-All Rights Reserved. See [LICENSE](LICENSE) for details.
+### 🚫 Texturas
+- **TODAS las texturas son de terceros**
+- **NO tengo derechos de autor** sobre ninguna textura
+- **Uso personal no comercial** únicamente
+- **Eliminaré cualquier textura** si el autor original contacta
 
-## 🙏 Credits
+### 🤖 Código
+- **Generado 100% por IA** (OpenCode CLI + DeepSeek V3.2 API)
+- **Sin garantías de funcionamiento**
+- **Uso bajo tu propio riesgo**
+- **Proyecto personal** sin fines comerciales
 
-### Development
-- **Fi3w0** - Project Lead & Main Developer
-- **DeepSeek V3.2 API with OpenCode Agents** - AI-assisted development and optimization
+## 🙏 Créditos y Agradecimientos
 
-### Special Thanks
-- Minecraft Fabric community for excellent documentation
-- All testers and contributors
-- The modding community for inspiration
+### Desarrollo (Vibecoding)
+- **Fi3w0** - Idea original y contexto de lore del SMP
+- **DeepSeek V3.2 API con OpenCode Agents** - **100% del código generado**
+- **0% ayuda humana** en programación - puro vibecoding
 
-## 🔗 Links
+### Agradecimientos Especiales
+- **Comunidad de Minecraft Fabric** por documentación
+- **Todos los recursos de texturas usados** (autores originales)
+- **El concepto de vibecoding** que hizo esto posible
+
+## 🔗 Enlaces
 
 - **GitHub**: [https://github.com/Fi3w0/FiwStoryMod](https://github.com/Fi3w0/FiwStoryMod)
-- **Issues**: [Report Bugs](https://github.com/Fi3w0/FiwStoryMod/issues)
-- **Discussions**: [Community Forum](https://github.com/Fi3w0/FiwStoryMod/discussions)
+- **Issues**: [Reportar Bugs](https://github.com/Fi3w0/FiwStoryMod/issues) (pueden no arreglarse)
+- **Discussions**: [Foro](https://github.com/Fi3w0/FiwStoryMod/discussions) (para lore del SMP)
 
-## 📊 Version History
+## 📊 Historial de Versiones (Para Contexto)
 
-### v1.3.33 (Current)
-- Fixed cursed spear texture JSON corruption
-- Restored original texture from v1.3.26
-- Maintained model scale and position adjustments
-- Improved ability cooldown messaging
+### v1.3.33 (Actual)
+- Arreglada corrupción JSON de textura de lanza maldita
+- Textura original restaurada desde v1.3.26
+- Ajustes de escala y posición mantenidos
+- Mejora en mensajes de cooldown
 
 ### v1.3.0+
-- Added World Barrage ability system
-- Implemented Fi3w0 Glasses requirement
-- Added PvP balance adjustments
-- Enhanced visual effects
+- Añadido sistema World Barrage
+- Implementado requisito de Gafas de Fi3w0
+- Ajustes de balance (no para PvP)
+- Efectos visuales mejorados
 
 ### v1.0.0 - v1.2.0
-- Core corruption system implementation
-- Basic artifact collection
-- Soulbound system
-- Dimension creation
-- Command framework
+- Sistema base de corrupción
+- Colección básica de artefactos
+- Sistema soulbound
+- Creación de dimensión
+- Framework de comandos
 
 ---
 
-**Enjoy your journey through the world of Fiw Story! May your corruption be balanced and your artifacts powerful.**
+**⚠️ ADVERTENCIA FINAL ⚠️**
+
+Este es mi **mod personal para mi SMP**. 
+- **NO** es profesional
+- **NO** está balanceado  
+- **NO** tiene soporte técnico
+- **TODO** el código es generado por AI
+- **Texturas** son de terceros sin derechos
+- **Lore** específico de mi servidor
+
+**Si decides usarlo: es bajo TU PROPIO RIESGO.**
+**El contexto y lore no tendrán sentido fuera de mi SMP.**
+
+**¡Vibecoding puro! 🎮**

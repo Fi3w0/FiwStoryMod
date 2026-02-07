@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "id": "fiwstory",
   "version": "${version}",
-  "name": "Fiw Story [BETA]",
-  "description": "Gods, powers and artifacts - Mystery and discovery await",
+  "name": "Fiw Story [PERSONAL SMP MOD]",
+  "description": "⚠️ MOD PERSONAL - Código 100% AI - Texturas de terceros - Para lore de SMP específico",
   "authors": [
-    "Fi3w0"
+    "Fi3w0 (idea) + AI (código)"
   ],
   "contact": {
-    "homepage": "https://example.com/",
-    "sources": "https://example.com/"
+    "homepage": "https://github.com/Fi3w0/FiwStoryMod",
+    "sources": "https://github.com/Fi3w0/FiwStoryMod"
   },
-  "license": "All Rights Reserved",
+  "license": "Personal Use Only - See LICENSE",
   "icon": "assets/fiwstory/icon.png",
   "environment": "*",
   "entrypoints": {

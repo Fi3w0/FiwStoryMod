@@ -1,25 +1,62 @@
-ALL RIGHTS RESERVED
+AVISO LEGAL IMPORTANTE - PROYECTO PERSONAL
 
-Fiw Story Mod
-Copyright (c) 2025 Fi3w0
+Fiw Story Mod - Proyecto Personal para SMP
+Contexto: Mod personal creado específicamente para mi servidor SMP de Minecraft
 
-This software and all associated files are the property of Fi3w0.
-No part of this software may be reproduced, distributed, or transmitted
-in any form or by any means without the prior written permission of
-the copyright holder.
+================================================================================
+🚫 ADVERTENCIAS CRÍTICAS:
+================================================================================
 
-Permission is hereby NOT granted to:
-1. Redistribute this software or modified versions
-2. Use this software for commercial purposes
-3. Reverse engineer, decompile, or disassemble this software
-4. Remove or alter copyright notices
+1. TEXTURAS:
+   - TODAS las texturas son de terceros
+   - NO tengo derechos de autor sobre ninguna textura
+   - Uso únicamente para propósitos personales y no comerciales
+   - Eliminaré inmediatamente cualquier textura si el autor original contacta
 
-The software is provided "as is", without warranty of any kind, express
-or implied, including but not limited to the warranties of merchantability,
-fitness for a particular purpose and noninfringement. In no event shall the
-authors or copyright holders be liable for any claim, damages or other
-liability, whether in an action of contract, tort or otherwise, arising from,
-out of or in connection with the software or the use or other dealings in
-the software.
+2. CÓDIGO:
+   - 100% generado por IA (OpenCode CLI + DeepSeek V3.2 API)
+   - 0% ayuda humana en programación - puro vibecoding
+   - Sin garantías de funcionamiento
+   - Muchos bugs esperados - código generado automáticamente
 
-For permissions and inquiries, contact: fi3w0@github.com
+3. PROPOSITO:
+   - Proyecto personal para mi servidor SMP
+   - NO para distribución pública o comercial
+   - NO para uso en modpacks públicos
+   - Contexto y lore específicos de mi SMP
+
+================================================================================
+CONDICIONES DE USO:
+================================================================================
+
+USO PERSONAL PERMITIDO:
+- Puedes clonar, forkear o modificar para uso personal
+- Puedes compilar y usar en tu propio Minecraft
+- Puedes crear ramas y hacer cambios (excepto en rama main)
+
+PROHIBIDO:
+- Uso comercial o distribución con fines de lucro
+- Afirmar autoría del código (generado por IA)
+- Reclamar derechos sobre texturas (de terceros)
+- Modificar la rama main sin permiso explícito
+
+LIMITACIÓN DE RESPONSABILIDAD:
+Este software se proporciona "TAL CUAL", sin garantía de ningún tipo, expresa o
+implícita, incluyendo pero no limitado a garantías de comerciabilidad, idoneidad
+para un propósito particular y no infracción. En ningún caso los autores o
+titulares de derechos de autor serán responsables por cualquier reclamo, daño u
+otra responsabilidad, ya sea en una acción de contrato, agravio o de otro modo,
+que surja de, fuera de o en conexión con el software o el uso u otros tratos en
+el software.
+
+CONTACTO:
+Para consultas sobre el proyecto personal: fi3w0@github.com
+(Para temas de copyright de texturas: contactar a los autores originales)
+
+================================================================================
+CRÉDITOS:
+================================================================================
+- Código: 100% generado por DeepSeek V3.2 API con OpenCode Agents
+- Idea y contexto: Fi3w0 (para lore de SMP personal)
+- Texturas: Varios autores/orígenes (sin derechos retenidos)
+- Vibecoding puro - sin intervención humana en programación
