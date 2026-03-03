@@ -11,8 +11,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
@@ -64,9 +68,27 @@ public class BloodGemArtifact extends Item implements Trinket {
     // ========== TRINKETS API ==========
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (entity instanceof net.minecraft.entity.player.PlayerEntity player) {
-            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
-        }
+        if (!(entity instanceof PlayerEntity player)) return;
+        TrinketHelper.handleCreativeDuplication(player, stack, slot);
+    }
+
+    // ========== EVENTO: Robo de Vida (lifesteal 15%) ==========
+    public static void registerDamageEvents() {
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+            if (entity.getWorld().isClient()) return true;
+            if (!(source.getAttacker() instanceof PlayerEntity attacker)) return true;
+            if (!TrinketHelper.hasArtifactOfType(attacker, BloodGemArtifact.class)) return true;
+
+            float heal = amount * 0.15f;
+            attacker.heal(heal);
+
+            if (entity.getWorld() instanceof ServerWorld sw) {
+                sw.spawnParticles(ParticleTypes.HEART,
+                    attacker.getX(), attacker.getY() + 1.2, attacker.getZ(),
+                    2, 0.3, 0.2, 0.3, 0.01);
+            }
+            return true;
+        });
     }
 
     @Override

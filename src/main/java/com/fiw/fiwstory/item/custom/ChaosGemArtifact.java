@@ -11,19 +11,26 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class ChaosGemArtifact extends Item implements Trinket {
 
     private static final UUID OFFHAND_UUID = UUID.fromString("A1B2C3D4-E5F6-4789-AB01-CD23EF456789");
+    private static final Random CHAOS_RNG = new Random();
 
     public ChaosGemArtifact(Settings settings) {
         super(settings.maxCount(1).fireproof());
@@ -64,8 +71,29 @@ public class ChaosGemArtifact extends Item implements Trinket {
     // ========== TRINKETS API ==========
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (entity instanceof net.minecraft.entity.player.PlayerEntity player) {
-            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (!(entity instanceof PlayerEntity player)) return;
+        if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (entity.getWorld().isClient()) return;
+
+        // Caos Latente: efecto aleatorio cada 30 segundos
+        if (entity.getWorld().getTime() % 600 != 0) return;
+
+        int roll = CHAOS_RNG.nextInt(4);
+        StatusEffectInstance effect = switch (roll) {
+            case 0 -> new StatusEffectInstance(StatusEffects.HASTE,   100, 1, false, true, true); // Haste II
+            case 1 -> new StatusEffectInstance(StatusEffects.SPEED,   100, 1, false, true, true); // Speed II
+            case 2 -> new StatusEffectInstance(StatusEffects.STRENGTH, 100, 0, false, true, true); // Strength I
+            default -> new StatusEffectInstance(StatusEffects.NIGHT_VISION, 200, 0, false, true, true); // Night Vision
+        };
+        player.addStatusEffect(effect);
+
+        String[] names = {"§aHaste II", "§bSpeed II", "§cStrength I", "§7Night Vision"};
+        player.sendMessage(Text.literal("§5⚡ Caos Latente§7: " + names[roll]), true);
+
+        if (entity.getWorld() instanceof ServerWorld sw) {
+            sw.spawnParticles(ParticleTypes.PORTAL,
+                player.getX(), player.getY() + 1.0, player.getZ(),
+                20, 0.4, 0.6, 0.4, 0.12);
         }
     }
 

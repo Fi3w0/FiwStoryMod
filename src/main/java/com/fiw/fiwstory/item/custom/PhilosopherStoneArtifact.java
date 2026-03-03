@@ -3,13 +3,19 @@ package com.fiw.fiwstory.item.custom;
 import com.fiw.fiwstory.lib.TrinketHelper;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.Trinket;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,8 +38,25 @@ public class PhilosopherStoneArtifact extends Item implements Trinket {
 
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (entity instanceof PlayerEntity player) {
-            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (!(entity instanceof PlayerEntity player)) return;
+        if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (entity.getWorld().isClient()) return;
+
+        long time = entity.getWorld().getTime();
+
+        // Transmutación: Luck I permanente visible
+        if (!player.hasStatusEffect(StatusEffects.LUCK)) {
+            player.addStatusEffect(new StatusEffectInstance(
+                StatusEffects.LUCK, 100, 0, false, false, true));
+        }
+
+        // Transmutación: generar 1-2 XP cada 30 segundos
+        if (time % 600 == 0 && entity.getWorld() instanceof ServerWorld sw) {
+            int xp = 1 + sw.getRandom().nextInt(2); // 1-2 XP
+            ExperienceOrbEntity.spawn(sw, new Vec3d(player.getX(), player.getY() + 0.5, player.getZ()), xp);
+            sw.spawnParticles(ParticleTypes.ENCHANT,
+                player.getX(), player.getY() + 0.5, player.getZ(),
+                8, 0.3, 0.4, 0.3, 0.05);
         }
     }
 

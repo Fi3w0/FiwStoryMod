@@ -11,8 +11,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
@@ -64,8 +67,20 @@ public class PharaohScarabArtifact extends Item implements Trinket {
     // ========== TRINKETS API ==========
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (entity instanceof net.minecraft.entity.player.PlayerEntity player) {
-            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (!(entity instanceof PlayerEntity player)) return;
+        if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (entity.getWorld().isClient()) return;
+
+        // Bendición Solar: regenerar 0.5 corazón cada 3s durante el día
+        if (entity.getWorld().isDay() && entity.getWorld().getTime() % 60 == 0) {
+            if (player.getHealth() < player.getMaxHealth()) {
+                player.heal(1.0f);
+                if (entity.getWorld() instanceof ServerWorld sw) {
+                    sw.spawnParticles(ParticleTypes.GLOW,
+                        player.getX(), player.getY() + 1.2, player.getZ(),
+                        4, 0.3, 0.4, 0.3, 0.02);
+                }
+            }
         }
     }
 

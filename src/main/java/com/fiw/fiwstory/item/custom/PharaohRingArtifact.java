@@ -11,6 +11,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
@@ -64,8 +67,14 @@ public class PharaohRingArtifact extends Item implements Trinket {
     // ========== TRINKETS API ==========
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (entity instanceof net.minecraft.entity.player.PlayerEntity player) {
-            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (!(entity instanceof PlayerEntity player)) return;
+        if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        if (entity.getWorld().isClient()) return;
+
+        // Fortuna Divina: mantener Luck I visible como efecto de estado
+        if (!player.hasStatusEffect(StatusEffects.LUCK)) {
+            player.addStatusEffect(new StatusEffectInstance(
+                StatusEffects.LUCK, 100, 0, false, false, true));
         }
     }
 
