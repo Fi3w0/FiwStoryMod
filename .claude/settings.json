@@ -16,7 +16,9 @@
       "Bash(ls -lh /home/fiw/Documents/Proyects/fiw_story/build/libs/*.jar)",
       "Bash(done)",
       "Bash(./gradlew compileJava)",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(git add src/main/java/com/fiw/fiwstory/FiwstoryMod.java src/main/java/com/fiw/fiwstory/item/BaseArtifactItem.java src/main/java/com/fiw/fiwstory/item/ModItems.java src/main/java/com/fiw/fiwstory/item/custom/BloodGemArtifact.java src/main/java/com/fiw/fiwstory/item/custom/ChaosGemArtifact.java src/main/java/com/fiw/fiwstory/item/custom/EscarabajoArtifact.java src/main/java/com/fiw/fiwstory/item/custom/FallenGodHeartArtifact.java src/main/java/com/fiw/fiwstory/item/custom/PharaohRingArtifact.java src/main/java/com/fiw/fiwstory/item/custom/PharaohScarabArtifact.java src/main/java/com/fiw/fiwstory/item/custom/PhilosopherStoneArtifact.java src/main/java/com/fiw/fiwstory/item/custom/TemporalStructureArtifact.java src/main/java/com/fiw/fiwstory/item/custom/MagicTomeItem.java src/main/java/com/fiw/fiwstory/lib/TrinketHelper.java src/main/resources/assets/fiwstory/lang/en_us.json src/main/resources/assets/fiwstory/lang/es_es.json src/main/resources/assets/fiwstory/models/item/tomo_magico.json src/main/resources/assets/fiwstory/textures/item/tomo_magico.png src/main/resources/assets/fiwstory/textures/item/tomo_magico.png.mcmeta src/main/resources/data/trinkets/slots/charm/artifact.json)",
+      "Bash(git commit:*)"
     ]
   }
 }
