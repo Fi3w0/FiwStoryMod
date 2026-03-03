@@ -24,6 +24,7 @@ import com.fiw.fiwstory.item.custom.DivineBloodItem;
 import com.fiw.fiwstory.item.custom.CorrodedCopperRingArtifact;
 import com.fiw.fiwstory.item.custom.PlainCopperRingArtifact;
 import com.fiw.fiwstory.item.custom.GoddessFlowerArtifact;
+import com.fiw.fiwstory.item.custom.MagicTomeItem;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -99,6 +100,9 @@ public class ModItems {
 
 	public static final Item ARTIFACT_GODDESS_FLOWER = registerItem("artifact_goddess_flower",
 			new GoddessFlowerArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item TOMO_MAGICO = registerItem("tomo_magico",
+			new MagicTomeItem(new Item.Settings().maxCount(1).fireproof()));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);

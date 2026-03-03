@@ -71,5 +71,7 @@
   "item.fiwstory.artifact_goddess_flower": "Amuleto de la Diosa de la Naturaleza",
   "item.fiwstory.artifact_goddess_flower.tooltip.line1": "Recuerdo del Pasado - Diosa de la Naturaleza",
   "item.fiwstory.artifact_goddess_flower.tooltip.line2": "Donde su energía florece, la vida responde... y los intrusos son castigados",
-  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Artefacto Épico - Accesorio"
+  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Artefacto Épico - Accesorio",
+
+  "item.fiwstory.tomo_magico": "Tomo del Eco Corrupto"
 }

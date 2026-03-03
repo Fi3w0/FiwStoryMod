@@ -82,5 +82,7 @@
   "item.fiwstory.artifact_goddess_flower": "Amulet of the Nature Goddess",
   "item.fiwstory.artifact_goddess_flower.tooltip.line1": "Memory of the Past - Nature Goddess",
   "item.fiwstory.artifact_goddess_flower.tooltip.line2": "Where her energy blooms, life responds... and intruders are punished",
-  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Epic Artifact - Accessory"
+  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Epic Artifact - Accessory",
+
+  "item.fiwstory.tomo_magico": "Tome of the Corrupt Echo"
 }

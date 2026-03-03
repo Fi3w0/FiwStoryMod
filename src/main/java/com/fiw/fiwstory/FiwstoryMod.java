@@ -28,6 +28,7 @@ import com.fiw.fiwstory.event.CorruptionPreventionEvent;
 import com.fiw.fiwstory.event.CorruptionTrackingEvent;
 import com.fiw.fiwstory.event.ModEvents;
 import com.fiw.fiwstory.event.PhilosopherStoneEvents;
+import com.fiw.fiwstory.item.custom.MagicTomeItem;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -63,6 +64,7 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.ARTIFACT_CORRODED_COPPER_RING);
 			entries.add(ModItems.ARTIFACT_PLAIN_COPPER_RING);
 			entries.add(ModItems.ARTIFACT_GODDESS_FLOWER);
+			entries.add(ModItems.TOMO_MAGICO);
 			})
 			.build();
 
@@ -95,6 +97,9 @@ public class FiwstoryMod implements ModInitializer {
 		// Registrar efectos de estado
 		ModStatusEffects.registerStatusEffects();
 		
+		// Registrar eventos de daño del Tomo Mágico
+		MagicTomeItem.registerDamageEvents();
+
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();
 		PhilosopherStoneEvents.registerEvents();

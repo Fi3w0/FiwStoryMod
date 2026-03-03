@@ -1,5 +1,6 @@
 package com.fiw.fiwstory.lib;
 
+import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.entity.player.PlayerEntity;
@@ -103,6 +104,56 @@ public class TrinketHelper {
             }
         }
         return ItemStack.EMPTY;
+    }
+
+    /**
+     * Verifica si un jugador tiene un artefacto de una clase específica equipado
+     * SOLO en offhand o trinket slot (NO mainhand).
+     */
+    public static boolean hasInOffhandOrTrinket(PlayerEntity player, Class<? extends Item> itemClass) {
+        if (itemClass.isInstance(player.getOffHandStack().getItem())) return true;
+
+        Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(player);
+        if (component.isPresent()) {
+            for (var entry : component.get().getAllEquipped()) {
+                if (itemClass.isInstance(entry.getRight().getItem())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Fix para creative mode: detecta si el jugador en creative tiene una copia
+     * del item del trinket en su inventario/cursor (creative copia en vez de mover).
+     * Si detecta duplicado, limpia el slot de trinket.
+     * Retorna true si se limpió el slot (el tick debe terminar).
+     */
+    public static boolean handleCreativeDuplication(PlayerEntity player, ItemStack trinketStack, SlotReference slot) {
+        if (!player.isCreative()) return false;
+
+        Item trinketItem = trinketStack.getItem();
+
+        // Check cursor (item being held by mouse)
+        if (player.currentScreenHandler != null) {
+            ItemStack cursor = player.currentScreenHandler.getCursorStack();
+            if (!cursor.isEmpty() && cursor.getItem() == trinketItem) {
+                slot.inventory().setStack(slot.index(), ItemStack.EMPTY);
+                return true;
+            }
+        }
+
+        // Check regular inventory (hotbar + main + offhand)
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack invStack = player.getInventory().getStack(i);
+            if (!invStack.isEmpty() && invStack.getItem() == trinketItem) {
+                slot.inventory().setStack(slot.index(), ItemStack.EMPTY);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

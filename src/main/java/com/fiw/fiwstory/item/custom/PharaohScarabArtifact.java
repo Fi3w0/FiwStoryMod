@@ -2,6 +2,7 @@ package com.fiw.fiwstory.item.custom;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.fiw.fiwstory.lib.TrinketHelper;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.Trinket;
 import net.minecraft.client.item.TooltipContext;
@@ -61,6 +62,13 @@ public class PharaohScarabArtifact extends Item implements Trinket {
     }
 
     // ========== TRINKETS API ==========
+    @Override
+    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        if (entity instanceof net.minecraft.entity.player.PlayerEntity player) {
+            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        }
+    }
+
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
         return buildModifiers(uuid);

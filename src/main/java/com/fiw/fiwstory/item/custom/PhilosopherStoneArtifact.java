@@ -1,6 +1,10 @@
 package com.fiw.fiwstory.item.custom;
 
+import com.fiw.fiwstory.lib.TrinketHelper;
+import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.Trinket;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,6 +28,13 @@ public class PhilosopherStoneArtifact extends Item implements Trinket {
     @Override
     public boolean isEnchantable(ItemStack stack) {
         return false;
+    }
+
+    @Override
+    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        if (entity instanceof PlayerEntity player) {
+            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        }
     }
 
     @Override

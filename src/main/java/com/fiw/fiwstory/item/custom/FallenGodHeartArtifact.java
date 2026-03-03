@@ -79,6 +79,9 @@ public class FallenGodHeartArtifact extends Item implements Trinket {
     // ========== TRINKETS API ==========
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        if (entity instanceof PlayerEntity player) {
+            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        }
         if (!entity.getWorld().isClient() && entity instanceof PlayerEntity player) {
             handleHeartEffects(player, entity.getWorld());
         }
@@ -90,8 +93,8 @@ public class FallenGodHeartArtifact extends Item implements Trinket {
 
         long worldTime = world.getTime();
 
-        // Verificar si tiene el corazón equipado (offhand, mainhand o trinket)
-        boolean hasHeart = TrinketHelper.hasArtifactOfType(player, FallenGodHeartArtifact.class);
+        // Verificar si tiene el corazón equipado SOLO en offhand o trinket (NO mainhand)
+        boolean hasHeart = TrinketHelper.hasInOffhandOrTrinket(player, FallenGodHeartArtifact.class);
 
         // Obtener datos persistentes del jugador
         HeartData.PlayerHeartData heartData = HeartData.get(player);

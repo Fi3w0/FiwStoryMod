@@ -3,6 +3,7 @@ package com.fiw.fiwstory.item;
 import com.fiw.fiwstory.lib.FiwNBT;
 import com.fiw.fiwstory.lib.FiwEffects;
 import com.fiw.fiwstory.lib.FiwUtils;
+import com.fiw.fiwstory.lib.TrinketHelper;
 import com.google.common.collect.Multimap;
 import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.Trinket;
@@ -452,6 +453,9 @@ public abstract class BaseArtifactItem extends Item implements Trinket {
      */
     @Override
     public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        if (entity instanceof PlayerEntity player) {
+            if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
+        }
         onArtifactTick(stack, entity.getWorld(), entity, slot.index(), true);
     }
 

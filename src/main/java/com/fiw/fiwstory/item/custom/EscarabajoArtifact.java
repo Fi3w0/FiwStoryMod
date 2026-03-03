@@ -63,7 +63,7 @@ public class EscarabajoArtifact extends BaseArtifactItem {
 
     @Override
     public void onArtifactTick(ItemStack stack, World world, LivingEntity entity, int slot, boolean selected) {
-        super.onArtifactTick(stack, world, entity, slot, selected);
+        // Accesorio pasivo - NO aplica efectos de corrupción (wither/slowness)
         // Atributos pasivos aplicados via Trinkets getModifiers
     }
 
