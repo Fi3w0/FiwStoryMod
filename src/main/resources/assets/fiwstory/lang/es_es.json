@@ -73,5 +73,12 @@
   "item.fiwstory.artifact_goddess_flower.tooltip.line2": "Donde su energía florece, la vida responde... y los intrusos son castigados",
   "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Artefacto Épico - Accesorio",
 
-  "item.fiwstory.tomo_magico": "Tomo del Eco Corrupto"
+  "item.fiwstory.tomo_magico": "Tomo del Eco Corrupto",
+
+  "item.fiwstory.carne_corrupta": "Carne Corrupta",
+
+  "item.fiwstory.frost_stone_artifact": "Piedra de Escarcha",
+  "item.fiwstory.frost_stone_artifact.tooltip.line1": "Recuerdo del Pasado - Rey de Hielo",
+  "item.fiwstory.frost_stone_artifact.tooltip.line2": "Su alma sigue en nuestro universo hasta después de su muerte",
+  "item.fiwstory.frost_stone_artifact.tooltip.line3": "Artefacto Épico - Accesorio"
 }

@@ -25,6 +25,8 @@ import com.fiw.fiwstory.item.custom.CorrodedCopperRingArtifact;
 import com.fiw.fiwstory.item.custom.PlainCopperRingArtifact;
 import com.fiw.fiwstory.item.custom.GoddessFlowerArtifact;
 import com.fiw.fiwstory.item.custom.MagicTomeItem;
+import com.fiw.fiwstory.item.custom.CorruptedMeatItem;
+import com.fiw.fiwstory.item.custom.FrostStoneArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -103,6 +105,12 @@ public class ModItems {
 
 	public static final Item TOMO_MAGICO = registerItem("tomo_magico",
 			new MagicTomeItem(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item CARNE_CORRUPTA = registerItem("carne_corrupta",
+			new CorruptedMeatItem(new Item.Settings().maxCount(64)));
+
+	public static final Item FROST_STONE_ARTIFACT = registerItem("frost_stone_artifact",
+			new FrostStoneArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);

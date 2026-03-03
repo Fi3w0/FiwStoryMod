@@ -65,12 +65,14 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.ARTIFACT_PLAIN_COPPER_RING);
 			entries.add(ModItems.ARTIFACT_GODDESS_FLOWER);
 			entries.add(ModItems.TOMO_MAGICO);
+			entries.add(ModItems.CARNE_CORRUPTA);
+			entries.add(ModItems.FROST_STONE_ARTIFACT);
 			})
 			.build();
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Fiw Story Mod v1.3.21");
+		LOGGER.info("Initializing Fiw Story Mod v1.4.1");
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);
@@ -88,6 +90,7 @@ public class FiwstoryMod implements ModInitializer {
 		registerTrinket(ModItems.ARTIFACT_CORRODED_COPPER_RING);
 		registerTrinket(ModItems.ARTIFACT_PLAIN_COPPER_RING);
 		registerTrinket(ModItems.ARTIFACT_GODDESS_FLOWER);
+		registerTrinket(ModItems.FROST_STONE_ARTIFACT);
 
 		// Registrar items que causan corrupción
 		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CURSED_SPEAR_OF_FI3W0);
