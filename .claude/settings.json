@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/lib/jvm/**)",
+      "Bash(javac -version)",
+      "Bash(./gradlew --stop)",
+      "Bash(docker compose build)",
+      "Bash(sudo systemctl start docker)",
+      "Bash(./gradlew tasks --group fabric)",
+      "Bash(./gradlew tasks)",
+      "Bash(./gradlew runServer)",
+      "Read(//home/fiw/.gradle/caches/**)",
+      "Bash(jar tf /home/fiw/Documents/Proyects/fiw_story/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-4060f3af86/1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2/minecraft-merged-4060f3af86-1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2.jar)",
+      "Bash(javap -p /home/fiw/Documents/Proyects/fiw_story/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-4060f3af86/1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2/minecraft-merged-4060f3af86-1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2.jar!/net/minecraft/sound/SoundEvents.class)",
+      "Bash(unzip -p .gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-merged-4060f3af86/1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2/minecraft-merged-4060f3af86-1.20.1-net.fabricmc.yarn.1_20_1.1.20.1+build.10-v2.jar net/minecraft/sound/SoundEvents.class)",
+      "Bash(ls -lh /home/fiw/Documents/Proyects/fiw_story/build/libs/*.jar)",
+      "Bash(done)",
+      "Bash(./gradlew compileJava)",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}

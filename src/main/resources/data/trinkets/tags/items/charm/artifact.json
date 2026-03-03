@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "fiwstory:pharaoh_scarab_artifact",
+    "fiwstory:chaos_gem_artifact",
+    "fiwstory:blood_gem_artifact",
+    "fiwstory:pharaoh_ring_artifact",
+    "fiwstory:temporal_structure_artifact",
+    "fiwstory:philosopher_stone_artifact",
+    "fiwstory:philosopher_stone_upgraded_artifact",
+    "fiwstory:fallen_god_heart_artifact",
+    "fiwstory:escarabajo_artifact",
+    "fiwstory:artifact_corroded_copper_ring",
+    "fiwstory:artifact_plain_copper_ring",
+    "fiwstory:artifact_goddess_flower"
+  ]
+}

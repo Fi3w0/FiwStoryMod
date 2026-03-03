@@ -113,9 +113,4 @@ public class ImmunityCommand {
         
         return isImmune ? 1 : 0;
     }
-    
-    public static boolean isPlayerImmune(ServerCommandSource source, UUID playerId) {
-        ImmunityData immunityData = ImmunityData.getServerState(source.getServer());
-        return immunityData.isPlayerImmune(playerId);
-    }
 }

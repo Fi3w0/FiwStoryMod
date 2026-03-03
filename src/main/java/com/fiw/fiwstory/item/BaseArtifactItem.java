@@ -3,8 +3,14 @@ package com.fiw.fiwstory.item;
 import com.fiw.fiwstory.lib.FiwNBT;
 import com.fiw.fiwstory.lib.FiwEffects;
 import com.fiw.fiwstory.lib.FiwUtils;
+import com.google.common.collect.Multimap;
+import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.Trinket;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,8 +30,10 @@ import java.util.UUID;
  * Proporciona funcionalidad común como sistema de bind, tooltips unificados,
  * efectos de corrupción y manejo de cooldowns.
  */
-public abstract class BaseArtifactItem extends Item {
-    
+public abstract class BaseArtifactItem extends Item implements Trinket {
+
+    private static final UUID BASE_OFFHAND_UUID = UUID.fromString("E5F6A7B8-C9D0-4123-EF45-AB67CD890123");
+
     // Tipos de artefactos según el PLAN MAESTRO
     public enum ArtifactType {
         WEAPON("Arma"),
@@ -420,5 +428,40 @@ public abstract class BaseArtifactItem extends Item {
      */
     public int getMaxUses() {
         return maxUses;
+    }
+
+    // ========== VANILLA OFFHAND ==========
+
+    /**
+     * Aplica atributos cuando el artefacto está en offhand.
+     * Delega a getModifiers para que las subclases solo definan atributos en un lugar.
+     */
+    @Override
+    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
+        if (slot == EquipmentSlot.OFFHAND) {
+            return getModifiers(ItemStack.EMPTY, null, null, BASE_OFFHAND_UUID);
+        }
+        return super.getAttributeModifiers(slot);
+    }
+
+    // ========== TRINKETS API ==========
+
+    /**
+     * Tick de Trinkets: se ejecuta cada tick mientras el artefacto está equipado en un slot de trinket.
+     * Delega al mismo onArtifactTick que usa inventoryTick.
+     */
+    @Override
+    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        onArtifactTick(stack, entity.getWorld(), entity, slot.index(), true);
+    }
+
+    /**
+     * Modificadores de atributos de Trinkets.
+     * Las subclases deben sobrescribir este método para proveer atributos.
+     * También se usa para offhand via getAttributeModifiers.
+     */
+    @Override
+    public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
+        return Trinket.super.getModifiers(stack, slot, entity, uuid);
     }
 }

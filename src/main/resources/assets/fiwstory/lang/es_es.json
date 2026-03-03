@@ -56,5 +56,20 @@
   "item.fiwstory.timeless_blade_artifact": "Timeless Blade",
   "item.fiwstory.timeless_blade_artifact.tooltip.line1": "Artefacto del Dios Faraón - Recuerdo del pasado",
   "item.fiwstory.timeless_blade_artifact.tooltip.line2": "Sobrevive en el espacio atemporal",
-  "item.fiwstory.timeless_blade_artifact.tooltip.line3": "Artefacto Legendario - Arma Atemporal"
+  "item.fiwstory.timeless_blade_artifact.tooltip.line3": "Artefacto Legendario - Arma Atemporal",
+
+  "item.fiwstory.artifact_corroded_copper_ring": "Amuleto de Cobre Corroído",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line1": "Recuerdo del Pasado - Dios del Trueno desconocido",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line2": "La corrosión no ha apagado su poder... solo lo ha vuelto inestable",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line3": "Artefacto Raro - Accesorio",
+
+  "item.fiwstory.artifact_plain_copper_ring": "Amuleto de Cobre Despertado",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line1": "Recuerdo del Pasado - Dios del Trueno restaurado",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line2": "Su poder responde al caos de la batalla",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line3": "Artefacto Épico - Accesorio",
+
+  "item.fiwstory.artifact_goddess_flower": "Amuleto de la Diosa de la Naturaleza",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line1": "Recuerdo del Pasado - Diosa de la Naturaleza",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line2": "Donde su energía florece, la vida responde... y los intrusos son castigados",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Artefacto Épico - Accesorio"
 }

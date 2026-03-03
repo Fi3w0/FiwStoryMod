@@ -21,6 +21,9 @@ import com.fiw.fiwstory.item.custom.PureCrystalItem;
 import com.fiw.fiwstory.item.custom.PureMixItem;
 import com.fiw.fiwstory.item.custom.HealingRuneItem;
 import com.fiw.fiwstory.item.custom.DivineBloodItem;
+import com.fiw.fiwstory.item.custom.CorrodedCopperRingArtifact;
+import com.fiw.fiwstory.item.custom.PlainCopperRingArtifact;
+import com.fiw.fiwstory.item.custom.GoddessFlowerArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -86,6 +89,16 @@ public class ModItems {
 	
 	public static final Item DIVINE_BLOOD = registerItem("divine_blood",
 			new DivineBloodItem(new Item.Settings().maxCount(42).fireproof()));
+
+	// === Recuerdos del Pasado ===
+	public static final Item ARTIFACT_CORRODED_COPPER_RING = registerItem("artifact_corroded_copper_ring",
+			new CorrodedCopperRingArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item ARTIFACT_PLAIN_COPPER_RING = registerItem("artifact_plain_copper_ring",
+			new PlainCopperRingArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item ARTIFACT_GODDESS_FLOWER = registerItem("artifact_goddess_flower",
+			new GoddessFlowerArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);

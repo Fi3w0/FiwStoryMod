@@ -3,6 +3,7 @@ package com.fiw.fiwstory;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -19,11 +20,12 @@ import com.fiw.fiwstory.command.BindCommand;
 import com.fiw.fiwstory.command.CorruptionCommand;
 import com.fiw.fiwstory.command.ImmunityCommand;
 import com.fiw.fiwstory.command.VoidCommand;
+import dev.emi.trinkets.api.Trinket;
+import dev.emi.trinkets.api.TrinketsApi;
 import com.fiw.fiwstory.effect.ModStatusEffects;
 import com.fiw.fiwstory.event.AmethystDropEvent;
 import com.fiw.fiwstory.event.CorruptionPreventionEvent;
 import com.fiw.fiwstory.event.CorruptionTrackingEvent;
-import com.fiw.fiwstory.event.ImmunityWhisperEvent;
 import com.fiw.fiwstory.event.ModEvents;
 import com.fiw.fiwstory.event.PhilosopherStoneEvents;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
@@ -57,6 +59,10 @@ public class FiwstoryMod implements ModInitializer {
 				entries.add(ModItems.ESPADA_CAOS_ARTIFACT);
 				entries.add(ModItems.TIMELESS_BLADE_ARTIFACT);
 				entries.add(ModItems.DIVINE_BLOOD);
+			// Recuerdos del Pasado
+			entries.add(ModItems.ARTIFACT_CORRODED_COPPER_RING);
+			entries.add(ModItems.ARTIFACT_PLAIN_COPPER_RING);
+			entries.add(ModItems.ARTIFACT_GODDESS_FLOWER);
 			})
 			.build();
 
@@ -66,6 +72,25 @@ public class FiwstoryMod implements ModInitializer {
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);
+
+		// Registrar trinkets
+		registerTrinket(ModItems.PHARAOH_SCARAB_ARTIFACT);
+		registerTrinket(ModItems.CHAOS_GEM_ARTIFACT);
+		registerTrinket(ModItems.BLOOD_GEM_ARTIFACT);
+		registerTrinket(ModItems.PHARAOH_RING_ARTIFACT);
+		registerTrinket(ModItems.TEMPORAL_STRUCTURE_ARTIFACT);
+		registerTrinket(ModItems.PHILOSOPHER_STONE_ARTIFACT);
+		registerTrinket(ModItems.PHILOSOPHER_STONE_UPGRADED_ARTIFACT);
+		registerTrinket(ModItems.FALLEN_GOD_HEART_ARTIFACT);
+		registerTrinket(ModItems.ESCARABAJO_ARTIFACT);
+		registerTrinket(ModItems.ARTIFACT_CORRODED_COPPER_RING);
+		registerTrinket(ModItems.ARTIFACT_PLAIN_COPPER_RING);
+		registerTrinket(ModItems.ARTIFACT_GODDESS_FLOWER);
+
+		// Registrar items que causan corrupción
+		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CURSED_SPEAR_OF_FI3W0);
+		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CORRUPTED_CRYSTAL);
+		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.FI3W0_GLASSES);
 		
 		// Registrar efectos de estado
 		ModStatusEffects.registerStatusEffects();
@@ -74,7 +99,6 @@ public class FiwstoryMod implements ModInitializer {
 		AmethystDropEvent.register();
 		PhilosopherStoneEvents.registerEvents();
 		CorruptionTrackingEvent.registerEvents();
-		ImmunityWhisperEvent.registerEvents();
 		CorruptionPreventionEvent.registerEvents();
 		
 		// Registrar sistema Soulbound
@@ -98,5 +122,11 @@ public class FiwstoryMod implements ModInitializer {
 		LOGGER.info("Timeless Void dimension system ready");
 		LOGGER.info("Commands: /v enter, /v leave, /v whitelist");
 		LOGGER.info("Timeless Blade can access Void (10s cooldown)");
+	}
+
+	private static void registerTrinket(Item item) {
+		if (item instanceof Trinket trinket) {
+			TrinketsApi.registerTrinket(item, trinket);
+		}
 	}
 }

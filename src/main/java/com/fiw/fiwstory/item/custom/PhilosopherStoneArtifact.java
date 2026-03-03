@@ -1,5 +1,6 @@
 package com.fiw.fiwstory.item.custom;
 
+import dev.emi.trinkets.api.Trinket;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PhilosopherStoneArtifact extends Item {
+public class PhilosopherStoneArtifact extends Item implements Trinket {
     public PhilosopherStoneArtifact(Settings settings) {
         super(settings.maxCount(1).fireproof());
     }

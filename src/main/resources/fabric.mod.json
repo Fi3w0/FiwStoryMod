@@ -28,9 +28,7 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "~${minecraft_version}"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "minecraft": "~${minecraft_version}",
+    "trinkets": ">=3.7.0"
   }
 }

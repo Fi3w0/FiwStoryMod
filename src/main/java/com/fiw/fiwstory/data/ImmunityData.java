@@ -21,8 +21,7 @@ public class ImmunityData extends PersistentState {
     // Datos por jugador: tiempo desde último susurro (en ticks)
     private final Map<UUID, PlayerImmunityData> playerData = new HashMap<>();
     
-    // Tiempo entre susurros: 10 minutos = 20 * 60 * 10 = 12000 ticks
-    private static final int WHISPER_INTERVAL = 20 * 60 * 10; // 10 minutos
+    private static final int WHISPER_INTERVAL = com.fiw.fiwstory.effect.CorruptionConstants.IMMUNITY_WHISPER_INTERVAL_TICKS;
     
     public static ImmunityData getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();

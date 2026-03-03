@@ -18,8 +18,8 @@ ENV EULA=TRUE
 # Puerto de Minecraft
 EXPOSE 25565
 
-# Copiar nuestro mod compilado (versión 1.2.6 con dimensión Timeless Void)
-COPY build/libs/fiwstory-1.2.6.jar /data/mods/
+# Copiar nuestro mod compilado
+COPY build/libs/fiwstory-1.3.33.jar /data/mods/
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \

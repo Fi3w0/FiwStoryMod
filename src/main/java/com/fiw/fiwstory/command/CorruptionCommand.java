@@ -211,7 +211,7 @@ public class CorruptionCommand {
         ServerPlayerEntity executor = source.getPlayerOrThrow();
         
         int currentLevel = CorruptionStatusEffect.getPlayerCorruptionLevel(target);
-        String progress = PureMixItem.getPlayerPurificationProgress(target.getUuid());
+        String progress = PureMixItem.getPlayerPurificationProgress(source.getServer(), target.getUuid());
         
         // Información básica
         FiwUtils.sendInfoMessage(executor, "=== Información de Corrupción ===");
@@ -263,7 +263,7 @@ public class CorruptionCommand {
         
         ServerCommandSource source = context.getSource();
         
-        PureMixItem.resetPlayerPurificationProgress(target.getUuid());
+        PureMixItem.resetPlayerPurificationProgress(source.getServer(), target.getUuid());
         FiwUtils.sendSuccessMessage(source.getPlayerOrThrow(), 
             "Progreso de purificación reseteado para " + target.getName().getString());
         FiwUtils.sendInfoMessage(target, "Tu progreso de purificación ha sido reseteado por un admin.");

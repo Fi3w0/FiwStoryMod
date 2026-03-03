@@ -1,7 +1,9 @@
 package com.fiw.fiwstory.item.custom;
 
+import com.fiw.fiwstory.data.CorruptionData;
 import com.fiw.fiwstory.lib.FiwUtils;
 import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -28,9 +30,6 @@ import java.util.List;
  */
 public class PureMixItem extends Item {
     
-    // Contador de usos por jugador para reducir fase
-    private static final java.util.Map<java.util.UUID, Integer> PLAYER_MIX_COUNT = new java.util.HashMap<>();
-    
     public PureMixItem(Settings settings) {
         super(settings.maxCount(16).food(
             new net.minecraft.item.FoodComponent.Builder()
@@ -55,37 +54,39 @@ public class PureMixItem extends Item {
         }
         
         ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-        
+
         // Estadísticas
         player.incrementStat(Stats.USED.getOrCreateStat(this));
         Criteria.CONSUME_ITEM.trigger(serverPlayer, stack);
-        
+
         // Verificar si el jugador tiene corrupción (doble verificación)
         int currentLevel = com.fiw.fiwstory.effect.CorruptionStatusEffect.getPlayerCorruptionLevel(player);
-        
+
         if (currentLevel <= 0) {
             // Si no tiene corrupción, solo consumir sin efectos
             return super.finishUsing(stack, world, user);
         }
-        
-        // Obtener o inicializar contador de mixes
+
+        // Obtener o inicializar contador de mixes (persistido en CorruptionData)
         java.util.UUID playerId = player.getUuid();
-        int mixCount = PLAYER_MIX_COUNT.getOrDefault(playerId, 0) + 1;
-        PLAYER_MIX_COUNT.put(playerId, mixCount);
-        
+        com.fiw.fiwstory.data.CorruptionData corruptionData =
+            com.fiw.fiwstory.data.CorruptionData.getServerState(serverPlayer.getServer());
+        int mixCount = corruptionData.getMixCount(playerId) + 1;
+        corruptionData.setMixCount(playerId, mixCount);
+
         // Calcular mixes requeridos (6-15 aleatorio por jugador)
         int requiredMixes = getRequiredMixesForPlayer(playerId);
-        
+
         // Efectos inmediatos (sin mensajes)
         applyImmediateEffects(player, currentLevel);
-        
+
         // Verificar si alcanzó mixes suficientes para bajar fase
         if (mixCount >= requiredMixes && currentLevel > 1) {
             // Reducir fase de corrupción (sin mensajes)
             reduceCorruptionLevel(player, currentLevel);
-            
+
             // Resetear contador
-            PLAYER_MIX_COUNT.put(playerId, 0);
+            corruptionData.resetMixCount(playerId);
         }
         
         // Efectos visuales sutiles
@@ -198,16 +199,14 @@ public class PureMixItem extends Item {
     /**
      * Obtiene el progreso de purificación de un jugador.
      */
-    public static String getPlayerPurificationProgress(java.util.UUID playerId) {
-        int mixCount = PLAYER_MIX_COUNT.getOrDefault(playerId, 0);
-        int requiredMixes = 6 + (Math.abs(playerId.hashCode()) % 10);
-        return String.format("%d/%d mixes", mixCount, requiredMixes);
+    public static String getPlayerPurificationProgress(MinecraftServer server, java.util.UUID playerId) {
+        return CorruptionData.getPlayerPurificationProgress(server, playerId);
     }
-    
+
     /**
      * Resetea el progreso de purificación de un jugador.
      */
-    public static void resetPlayerPurificationProgress(java.util.UUID playerId) {
-        PLAYER_MIX_COUNT.remove(playerId);
+    public static void resetPlayerPurificationProgress(MinecraftServer server, java.util.UUID playerId) {
+        CorruptionData.getServerState(server).resetMixCount(playerId);
     }
 }

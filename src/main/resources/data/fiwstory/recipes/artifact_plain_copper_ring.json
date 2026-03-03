@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "fiwstory:artifact_corroded_copper_ring"
+    },
+    {
+      "item": "minecraft:netherite_ingot"
+    }
+  ],
+  "result": {
+    "item": "fiwstory:artifact_plain_copper_ring",
+    "count": 1
+  }
+}

@@ -1,9 +1,8 @@
 package com.fiw.fiwstory.data;
 
 import com.fiw.fiwstory.effect.CorruptionStatusEffect;
-import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.lib.FiwUtils;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
@@ -11,9 +10,7 @@ import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Sistema de tracking de corrupción por items en inventario.
@@ -24,14 +21,16 @@ import java.util.UUID;
 public class CorruptionData extends PersistentState {
     
     private static final String DATA_NAME = "fiwstory_corruption_data";
-    
+
+    // Registro de items que causan corrupción
+    private static final Set<Item> CORRUPT_ITEMS = new HashSet<>();
+
     // Datos por jugador
     private final Map<UUID, PlayerCorruptionData> playerData = new HashMap<>();
     
-    // Tiempos en ticks (20 ticks = 1 segundo)
-    private static final int REMOVAL_DELAY = 20 * 15; // 15 segundos para quitar si se remueven items
-    private static final int MIN_ACTIVATION_TIME = 20 * 60 * 30; // 30 minutos mínimo
-    private static final int MAX_ACTIVATION_TIME = 20 * 60 * 90; // 90 minutos máximo
+    private static final int REMOVAL_DELAY = com.fiw.fiwstory.effect.CorruptionConstants.REMOVAL_DELAY_TICKS;
+    private static final int MIN_ACTIVATION_TIME = com.fiw.fiwstory.effect.CorruptionConstants.MIN_ACTIVATION_TICKS;
+    private static final int MAX_ACTIVATION_TIME = com.fiw.fiwstory.effect.CorruptionConstants.MAX_ACTIVATION_TICKS;
     
     public static CorruptionData getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
@@ -209,14 +208,49 @@ public class CorruptionData extends PersistentState {
         return info.toString();
     }
     
+    // ========== REGISTRO DE ITEMS CORRUPTOS ==========
+
+    public static void registerCorruptItem(Item item) {
+        CORRUPT_ITEMS.add(item);
+    }
+
+    public static boolean isCorruptItem(Item item) {
+        return CORRUPT_ITEMS.contains(item);
+    }
+
+    // ========== MÉTODOS DE PURIFICACIÓN ==========
+
+    public int getMixCount(UUID playerId) {
+        PlayerCorruptionData data = playerData.get(playerId);
+        return data != null ? data.mixCount : 0;
+    }
+
+    public void setMixCount(UUID playerId, int count) {
+        PlayerCorruptionData data = playerData.computeIfAbsent(playerId, uuid -> new PlayerCorruptionData());
+        data.mixCount = count;
+        this.markDirty();
+    }
+
+    public void resetMixCount(UUID playerId) {
+        PlayerCorruptionData data = playerData.get(playerId);
+        if (data != null) {
+            data.mixCount = 0;
+            this.markDirty();
+        }
+    }
+
+    public static String getPlayerPurificationProgress(MinecraftServer server, UUID playerId) {
+        CorruptionData corruptionData = getServerState(server);
+        int mixCount = corruptionData.getMixCount(playerId);
+        int requiredMixes = 6 + (Math.abs(playerId.hashCode()) % 10);
+        return String.format("%d/%d mixes", mixCount, requiredMixes);
+    }
+
     // ========== MÉTODOS PRIVADOS ==========
     
     private boolean checkCorruptItems(net.minecraft.server.network.ServerPlayerEntity player) {
-        // Lista de items que causan corrupción
-        return player.getInventory().containsAny(itemStack -> 
-            itemStack.isOf(ModItems.CURSED_SPEAR_OF_FI3W0) ||
-            itemStack.isOf(ModItems.CORRUPTED_CRYSTAL) ||
-            itemStack.isOf(ModItems.FI3W0_GLASSES)
+        return player.getInventory().containsAny(itemStack ->
+            CORRUPT_ITEMS.contains(itemStack.getItem())
         );
     }
     
@@ -276,7 +310,8 @@ public class CorruptionData extends PersistentState {
         boolean corruptionActive = false;
         int corruptionLevel = 0;
         boolean hadCorruptItemsLastTick = false;
-        
+        int mixCount = 0; // Progreso de purificación (mixes consumidos)
+
         void writeNbt(NbtCompound nbt) {
             nbt.putLong("corruptItemTime", corruptItemTime);
             nbt.putLong("activationTime", activationTime);
@@ -284,8 +319,9 @@ public class CorruptionData extends PersistentState {
             nbt.putBoolean("corruptionActive", corruptionActive);
             nbt.putInt("corruptionLevel", corruptionLevel);
             nbt.putBoolean("hadCorruptItemsLastTick", hadCorruptItemsLastTick);
+            nbt.putInt("mixCount", mixCount);
         }
-        
+
         static PlayerCorruptionData fromNbt(NbtCompound nbt) {
             PlayerCorruptionData data = new PlayerCorruptionData();
             data.corruptItemTime = nbt.getLong("corruptItemTime");
@@ -294,6 +330,7 @@ public class CorruptionData extends PersistentState {
             data.corruptionActive = nbt.getBoolean("corruptionActive");
             data.corruptionLevel = nbt.getInt("corruptionLevel");
             data.hadCorruptItemsLastTick = nbt.getBoolean("hadCorruptItemsLastTick");
+            data.mixCount = nbt.getInt("mixCount");
             return data;
         }
     }

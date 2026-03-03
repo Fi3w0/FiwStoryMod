@@ -1,7 +1,11 @@
 package com.fiw.fiwstory.item.custom;
 
 import com.fiw.fiwstory.data.HeartData;
+import com.fiw.fiwstory.lib.TrinketHelper;
+import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.Trinket;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -20,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class FallenGodHeartArtifact extends Item {
+public class FallenGodHeartArtifact extends Item implements Trinket {
     // UUIDs para modificadores de atributos
     private static final UUID MAX_HEALTH_MODIFIER_ID = UUID.fromString("A3B2C1D0-E4F5-4678-9A0B-1C2D3E4F5A6B");
     
@@ -72,21 +76,27 @@ public class FallenGodHeartArtifact extends Item {
         return TypedActionResult.success(stack);
     }
 
+    // ========== TRINKETS API ==========
+    @Override
+    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+        if (!entity.getWorld().isClient() && entity instanceof PlayerEntity player) {
+            handleHeartEffects(player, entity.getWorld());
+        }
+    }
+
     // Método para manejar los efectos del corazón
     public static void handleHeartEffects(PlayerEntity player, World world) {
         if (world.isClient()) return;
-        
-        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+
         long worldTime = world.getTime();
-        
-        // Verificar si tiene el corazón en offhand
-        ItemStack offhandStack = player.getOffHandStack();
-        boolean hasHeartInOffhand = offhandStack.getItem() instanceof FallenGodHeartArtifact;
-        
+
+        // Verificar si tiene el corazón equipado (offhand, mainhand o trinket)
+        boolean hasHeart = TrinketHelper.hasArtifactOfType(player, FallenGodHeartArtifact.class);
+
         // Obtener datos persistentes del jugador
         HeartData.PlayerHeartData heartData = HeartData.get(player);
-        
-        if (hasHeartInOffhand) {
+
+        if (hasHeart) {
             // Aplicar buffs si no está en mínimo de vida
             if (heartData.getCurrentMaxHealth() > MIN_HEALTH) {
                 // Resistencia I (en lugar de Regeneración)

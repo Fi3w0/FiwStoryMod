@@ -2,7 +2,8 @@ package com.fiw.fiwstory.event;
 
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.item.custom.FallenGodHeartArtifact;
-import com.fiw.fiwstory.lib.FiwUtils;
+import com.fiw.fiwstory.item.custom.PlainCopperRingArtifact;
+import com.fiw.fiwstory.lib.TrinketHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
@@ -115,14 +116,19 @@ public class ModEvents {
         // Tick del servidor para efectos del Corazón de Dios Caído - OPTIMIZADO
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             serverTickCounter++;
-            
+
             // Solo procesar cada 5 ticks (4Hz en lugar de 20Hz)
             if (serverTickCounter % 5 != 0) {
                 return;
             }
-            
+
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 FallenGodHeartArtifact.handleHeartEffects(player, player.getWorld());
+
+                // Detectar rayos cercanos para Amuleto de Cobre Despertado (cada 10 ticks)
+                if (serverTickCounter % 10 == 0) {
+                    checkNearbyLightning(player);
+                }
             }
         });
     }
@@ -171,5 +177,34 @@ public class ModEvents {
     // Método original mantenido para compatibilidad
     private static void spawnAbilityExplosion(ServerWorld world, Vec3d center) {
         spawnAbilityExplosionOptimized(world, center);
+    }
+
+    /**
+     * Detecta rayos cercanos al jugador para el Amuleto de Cobre Despertado.
+     * Si un rayo natural cae a 12 bloques, activa descarga adicional y cura.
+     */
+    private static void checkNearbyLightning(ServerPlayerEntity player) {
+        World world = player.getWorld();
+        if (!world.isThundering()) {
+            return;
+        }
+
+        // Verificar si tiene el amuleto (manos o trinket)
+        boolean hasRing = TrinketHelper.hasArtifactOfType(player, PlainCopperRingArtifact.class);
+        if (!hasRing) {
+            return;
+        }
+
+        // Buscar entidades de rayo cercanas
+        net.minecraft.util.math.Box searchBox = player.getBoundingBox().expand(12.0);
+        for (net.minecraft.entity.Entity entity : world.getOtherEntities(player, searchBox)) {
+            if (entity instanceof net.minecraft.entity.LightningEntity lightning) {
+                // Solo procesar rayos recién creados (age < 5 ticks)
+                if (lightning.age < 5) {
+                    PlainCopperRingArtifact.onNearbyLightningStrike(player, world, lightning.getPos());
+                    break; // Solo procesar un rayo por ciclo
+                }
+            }
+        }
     }
 }

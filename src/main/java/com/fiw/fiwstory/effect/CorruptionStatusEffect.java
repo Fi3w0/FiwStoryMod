@@ -1,6 +1,6 @@
 package com.fiw.fiwstory.effect;
 
-import com.fiw.fiwstory.command.ImmunityCommand;
+import com.fiw.fiwstory.data.ImmunityData;
 import com.fiw.fiwstory.lib.FiwUtils;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
@@ -97,15 +97,14 @@ public class CorruptionStatusEffect extends StatusEffect {
     
     public CorruptionStatusEffect() {
         super(
-            StatusEffectCategory.HARMFUL, // Efecto dañino
-            0x4B0082 // Color morado índigo para partículas
+            StatusEffectCategory.HARMFUL,
+            CorruptionConstants.EFFECT_COLOR
         );
     }
-    
+
     @Override
     public boolean canApplyUpdateEffect(int duration, int amplifier) {
-        // Aplicar efectos cada segundo (20 ticks)
-        return duration % 20 == 0;
+        return duration % CorruptionConstants.UPDATE_INTERVAL_TICKS == 0;
     }
     
     @Override
@@ -126,7 +125,7 @@ public class CorruptionStatusEffect extends StatusEffect {
         int corruptionLevel = amplifier + 1;
         
         // Verificar si el jugador es inmune
-        boolean isImmune = ImmunityCommand.isPlayerImmune(serverPlayer.getServer().getCommandSource(), player.getUuid());
+        boolean isImmune = ImmunityData.getServerState(serverPlayer.getServer()).isPlayerImmune(player.getUuid());
         
         // ========== EFECTOS POR NIVEL ==========
         
@@ -134,8 +133,8 @@ public class CorruptionStatusEffect extends StatusEffect {
         if (corruptionLevel >= 1) {
             // Daño gradual ignorando armadura (0.5-1.5 corazones por minuto)
             // Solo si NO es inmune
-            if (!isImmune && random.nextFloat() < 0.05f) { // 5% chance por segundo
-                float damage = 0.5f + (random.nextFloat() * 1.0f);
+            if (!isImmune && random.nextFloat() < CorruptionConstants.LEVEL1_DAMAGE_CHANCE) {
+                float damage = CorruptionConstants.LEVEL1_DAMAGE_BASE + (random.nextFloat() * CorruptionConstants.LEVEL1_DAMAGE_RANGE);
                 // Daño que ignora armadura
                 player.damage(player.getDamageSources().magic(), damage);
             }
@@ -147,10 +146,10 @@ public class CorruptionStatusEffect extends StatusEffect {
         }
         
         // Nivel 2+: Ceguera momentánea (solo si NO es inmune)
-        if (!isImmune && corruptionLevel >= 2 && random.nextFloat() < 0.01f) { // 1% chance por segundo
+        if (!isImmune && corruptionLevel >= 2 && random.nextFloat() < CorruptionConstants.LEVEL2_BLINDNESS_CHANCE) {
             player.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.BLINDNESS,
-                40 + (random.nextInt(40)), // 2-4 segundos
+                CorruptionConstants.BLINDNESS_DURATION_BASE + (random.nextInt(CorruptionConstants.BLINDNESS_DURATION_RANGE)),
                 0,
                 false,
                 false
@@ -158,38 +157,33 @@ public class CorruptionStatusEffect extends StatusEffect {
         }
         
         // Nivel 3+: Fatiga (solo si NO es inmune)
-        if (!isImmune && corruptionLevel >= 3 && random.nextFloat() < 0.02f) { // 2% chance por segundo
+        if (!isImmune && corruptionLevel >= 3 && random.nextFloat() < CorruptionConstants.LEVEL3_FATIGUE_CHANCE) {
             player.addStatusEffect(new StatusEffectInstance(
                 StatusEffects.MINING_FATIGUE,
-                100 + (random.nextInt(100)), // 5-10 segundos
+                CorruptionConstants.FATIGUE_DURATION_BASE + (random.nextInt(CorruptionConstants.FATIGUE_DURATION_RANGE)),
                 Math.min(2, corruptionLevel - 3), // Nivel 0-2
                 false,
                 false
             ));
         }
         
-        // Nivel 3-4: Reducción de vida máxima (solo si NO es inmune)
-        if (!isImmune && corruptionLevel >= 3 && corruptionLevel <= 4) {
-            adjustMaxHealth(player, corruptionLevel);
-        }
-        
         // Nivel 5: Efectos extremos (solo si NO es inmune)
         if (!isImmune && corruptionLevel >= 5) {
             // Más daño
-            if (random.nextFloat() < 0.1f) { // 10% chance por segundo
-                player.damage(player.getDamageSources().magic(), 1.0f + random.nextFloat());
+            if (random.nextFloat() < CorruptionConstants.LEVEL5_DAMAGE_CHANCE) {
+                player.damage(player.getDamageSources().magic(), CorruptionConstants.LEVEL5_DAMAGE_BASE + random.nextFloat() * CorruptionConstants.LEVEL5_DAMAGE_RANGE);
             }
             
             // Susurros más frecuentes y fuertes (siempre)
-            if (random.nextFloat() < 0.15f) {
+            if (random.nextFloat() < CorruptionConstants.LEVEL5_WHISPER_CHANCE) {
                 sendHighLevelWhisper(player);
             }
             
             // Náusea ocasional
-            if (random.nextFloat() < 0.03f) {
+            if (random.nextFloat() < CorruptionConstants.LEVEL5_NAUSEA_CHANCE) {
                 player.addStatusEffect(new StatusEffectInstance(
                     StatusEffects.NAUSEA,
-                    80 + (random.nextInt(80)), // 4-8 segundos
+                    CorruptionConstants.NAUSEA_DURATION_BASE + (random.nextInt(CorruptionConstants.NAUSEA_DURATION_RANGE)),
                     0,
                     false,
                     false
@@ -232,14 +226,14 @@ public class CorruptionStatusEffect extends StatusEffect {
     
     private float getWhisperChance(int corruptionLevel) {
         // Chance base aumenta con nivel
-        return 0.01f + (corruptionLevel * 0.005f); // 1% + 0.5% por nivel
+        return CorruptionConstants.WHISPER_BASE_CHANCE + (corruptionLevel * CorruptionConstants.WHISPER_LEVEL_BONUS);
     }
     
     private void sendWhisper(PlayerEntity player, int corruptionLevel) {
         Random random = RANDOM.get();
         String whisper;
         
-        if (corruptionLevel >= 4 && random.nextFloat() < 0.3f) {
+        if (corruptionLevel >= 4 && random.nextFloat() < CorruptionConstants.HIGH_LEVEL_WHISPER_THRESHOLD) {
             // 30% chance de frase de nivel alto en nivel 4+
             whisper = HIGH_LEVEL_WHISPERS.get(random.nextInt(HIGH_LEVEL_WHISPERS.size()));
         } else {
@@ -259,8 +253,8 @@ public class CorruptionStatusEffect extends StatusEffect {
                 player.getX(), player.getY(), player.getZ(),
                 net.minecraft.sound.SoundEvents.ENTITY_ENDERMAN_STARE,
                 net.minecraft.sound.SoundCategory.AMBIENT,
-                0.3f,
-                1.8f + (random.nextFloat() * 0.4f)
+                CorruptionConstants.WHISPER_VOLUME,
+                CorruptionConstants.WHISPER_PITCH_BASE + (random.nextFloat() * CorruptionConstants.WHISPER_PITCH_RANGE)
             );
         }
     }
@@ -281,8 +275,8 @@ public class CorruptionStatusEffect extends StatusEffect {
                 player.getX(), player.getY(), player.getZ(),
                 net.minecraft.sound.SoundEvents.ENTITY_WITHER_AMBIENT,
                 net.minecraft.sound.SoundCategory.AMBIENT,
-                0.4f,
-                0.5f + (random.nextFloat() * 0.5f)
+                CorruptionConstants.HIGH_WHISPER_VOLUME,
+                CorruptionConstants.HIGH_WHISPER_PITCH_BASE + (random.nextFloat() * CorruptionConstants.HIGH_WHISPER_PITCH_RANGE)
             );
         }
     }
@@ -292,7 +286,7 @@ public class CorruptionStatusEffect extends StatusEffect {
         if (maxHealthAttr == null) return;
         
         // Reducción basada en nivel (1-3 corazones)
-        double reduction = 2.0 * (corruptionLevel - 2); // 2, 4, 6 puntos (1-3 corazones)
+        double reduction = CorruptionConstants.HEALTH_REDUCTION_PER_LEVEL * (corruptionLevel - 2);
         
         // Verificar si ya aplicamos la reducción
         net.minecraft.entity.attribute.EntityAttributeModifier existingModifier = 

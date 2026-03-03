@@ -67,5 +67,20 @@
   "item.fiwstory.timeless_blade_artifact.tooltip.line1": "Artefacto del Dios Faraón - Recuerdo del pasado",
   "item.fiwstory.timeless_blade_artifact.tooltip.line2": "Sobrevive en el espacio atemporal",
   "item.fiwstory.timeless_blade_artifact.tooltip.line3": "Artefacto Legendario - Arma Atemporal",
-  "item.fiwstory.divine_blood": "Divine Blood"
+  "item.fiwstory.divine_blood": "Divine Blood",
+
+  "item.fiwstory.artifact_corroded_copper_ring": "Corroded Copper Amulet",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line1": "Memory of the Past - Unknown Thunder God",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line2": "The corrosion has not extinguished its power... only made it unstable",
+  "item.fiwstory.artifact_corroded_copper_ring.tooltip.line3": "Rare Artifact - Accessory",
+
+  "item.fiwstory.artifact_plain_copper_ring": "Awakened Copper Amulet",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line1": "Memory of the Past - Restored Thunder God",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line2": "Its power responds to the chaos of battle",
+  "item.fiwstory.artifact_plain_copper_ring.tooltip.line3": "Epic Artifact - Accessory",
+
+  "item.fiwstory.artifact_goddess_flower": "Amulet of the Nature Goddess",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line1": "Memory of the Past - Nature Goddess",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line2": "Where her energy blooms, life responds... and intruders are punished",
+  "item.fiwstory.artifact_goddess_flower.tooltip.line3": "Epic Artifact - Accessory"
 }
