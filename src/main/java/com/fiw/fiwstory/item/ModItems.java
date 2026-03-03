@@ -30,6 +30,8 @@ import com.fiw.fiwstory.item.custom.FrostStoneArtifact;
 import com.fiw.fiwstory.item.custom.GD42QuantumArtifact;
 import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
 import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
+import com.fiw.fiwstory.item.custom.SkyxernStoneArtifact;
+import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -123,6 +125,12 @@ public class ModItems {
 
 	public static final Item BRONZE_AXIOM_ARTIFACT = registerItem("bronze_axiom_artifact",
 			new BronzeAxiomArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item SKYXERN_STONE_ARTIFACT = registerItem("skyxern_stone_artifact",
+			new SkyxernStoneArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item SKYXERN_LEGACY_ARTIFACT = registerItem("skyxern_legacy_artifact",
+			new SkyxernLegacyArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);

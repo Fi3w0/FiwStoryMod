@@ -95,5 +95,15 @@
 
   "item.fiwstory.gd42_quantum": "GD42 Quantum",
   "item.fiwstory.mk88_tablet": "MK88 Tablet",
-  "item.fiwstory.bronze_axiom_artifact": "Bronze Automaton Axiom-7"
+  "item.fiwstory.bronze_axiom_artifact": "Bronze Automaton Axiom-7",
+
+  "item.fiwstory.skyxern_stone_artifact": "Astral Core",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line1": "A force sleeps within... it doesn't push, it attracts",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line2": "Zero Step: double jump + -20% fall damage (auto blessing every 42s)",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line3": "Epic Artifact - Accessory",
+
+  "item.fiwstory.skyxern_legacy_artifact": "Skyxern Legacy Fragment",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line1": "Fragment of the first firmament that saw this world be born",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line2": "Ascent of the Legacy: +speed +dmg 6s (90s CD) | Passive: 1 heart/10s",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Legendary Artifact - Accessory"
 }

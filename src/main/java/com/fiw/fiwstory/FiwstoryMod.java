@@ -31,6 +31,8 @@ import com.fiw.fiwstory.event.PhilosopherStoneEvents;
 import com.fiw.fiwstory.item.custom.MagicTomeItem;
 import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
 import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
+import com.fiw.fiwstory.item.custom.SkyxernStoneArtifact;
+import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -72,6 +74,8 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.GD42_QUANTUM);
 			entries.add(ModItems.MK88_TABLET);
 			entries.add(ModItems.BRONZE_AXIOM_ARTIFACT);
+		entries.add(ModItems.SKYXERN_STONE_ARTIFACT);
+		entries.add(ModItems.SKYXERN_LEGACY_ARTIFACT);
 			})
 			.build();
 
@@ -99,6 +103,8 @@ public class FiwstoryMod implements ModInitializer {
 		registerTrinket(ModItems.GD42_QUANTUM);
 		registerTrinket(ModItems.MK88_TABLET);
 		registerTrinket(ModItems.BRONZE_AXIOM_ARTIFACT);
+		registerTrinket(ModItems.SKYXERN_STONE_ARTIFACT);
+		registerTrinket(ModItems.SKYXERN_LEGACY_ARTIFACT);
 
 		// Registrar items que causan corrupción
 		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CURSED_SPEAR_OF_FI3W0);
@@ -112,6 +118,8 @@ public class FiwstoryMod implements ModInitializer {
 		MagicTomeItem.registerDamageEvents();
 		MK88TabletArtifact.registerDamageEvents();
 		BronzeAxiomArtifact.registerDamageEvents();
+		SkyxernStoneArtifact.registerDamageEvents();
+		SkyxernLegacyArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

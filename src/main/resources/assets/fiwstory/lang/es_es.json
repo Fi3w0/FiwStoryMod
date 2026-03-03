@@ -84,5 +84,15 @@
 
   "item.fiwstory.gd42_quantum": "GD42 Quantum",
   "item.fiwstory.mk88_tablet": "MK88 Tableta",
-  "item.fiwstory.bronze_axiom_artifact": "Autómata de Bronce Axiom-7"
+  "item.fiwstory.bronze_axiom_artifact": "Autómata de Bronce Axiom-7",
+
+  "item.fiwstory.skyxern_stone_artifact": "Núcleo Astral",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line1": "En su interior duerme una fuerza que no empuja… atrae",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line2": "Zero Step: doble salto + -20% daño caída | Bendición c/42s",
+  "item.fiwstory.skyxern_stone_artifact.tooltip.line3": "Artefacto Épico - Accesorio",
+
+  "item.fiwstory.skyxern_legacy_artifact": "Fragmento del Legado Skyxern",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line1": "Fragmento del primer firmamento que vio nacer este mundo",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line2": "Ascenso del Legado: vel+15% | dmg+15% | 6s (90s CD) | Pasiva: 1♥/10s",
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Artefacto Legendario - Accesorio"
 }
