@@ -80,5 +80,9 @@
   "item.fiwstory.frost_stone_artifact": "Piedra de Escarcha",
   "item.fiwstory.frost_stone_artifact.tooltip.line1": "Recuerdo del Pasado - Rey de Hielo",
   "item.fiwstory.frost_stone_artifact.tooltip.line2": "Su alma sigue en nuestro universo hasta después de su muerte",
-  "item.fiwstory.frost_stone_artifact.tooltip.line3": "Artefacto Épico - Accesorio"
+  "item.fiwstory.frost_stone_artifact.tooltip.line3": "Artefacto Épico - Accesorio",
+
+  "item.fiwstory.gd42_quantum": "GD42 Quantum",
+  "item.fiwstory.mk88_tablet": "MK88 Tableta",
+  "item.fiwstory.bronze_axiom_artifact": "Autómata de Bronce Axiom-7"
 }

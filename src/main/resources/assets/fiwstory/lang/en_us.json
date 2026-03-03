@@ -91,5 +91,9 @@
   "item.fiwstory.frost_stone_artifact": "Frost Stone",
   "item.fiwstory.frost_stone_artifact.tooltip.line1": "Memory of the Past - Ice King",
   "item.fiwstory.frost_stone_artifact.tooltip.line2": "His soul remains in our universe even after death",
-  "item.fiwstory.frost_stone_artifact.tooltip.line3": "Epic Artifact - Accessory"
+  "item.fiwstory.frost_stone_artifact.tooltip.line3": "Epic Artifact - Accessory",
+
+  "item.fiwstory.gd42_quantum": "GD42 Quantum",
+  "item.fiwstory.mk88_tablet": "MK88 Tablet",
+  "item.fiwstory.bronze_axiom_artifact": "Bronze Automaton Axiom-7"
 }

@@ -29,6 +29,8 @@ import com.fiw.fiwstory.event.CorruptionTrackingEvent;
 import com.fiw.fiwstory.event.ModEvents;
 import com.fiw.fiwstory.event.PhilosopherStoneEvents;
 import com.fiw.fiwstory.item.custom.MagicTomeItem;
+import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
+import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -67,12 +69,15 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.TOMO_MAGICO);
 			entries.add(ModItems.CARNE_CORRUPTA);
 			entries.add(ModItems.FROST_STONE_ARTIFACT);
+			entries.add(ModItems.GD42_QUANTUM);
+			entries.add(ModItems.MK88_TABLET);
+			entries.add(ModItems.BRONZE_AXIOM_ARTIFACT);
 			})
 			.build();
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Fiw Story Mod v1.4.1");
+		LOGGER.info("Initializing Fiw Story Mod v1.4.2");
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);
@@ -91,6 +96,9 @@ public class FiwstoryMod implements ModInitializer {
 		registerTrinket(ModItems.ARTIFACT_PLAIN_COPPER_RING);
 		registerTrinket(ModItems.ARTIFACT_GODDESS_FLOWER);
 		registerTrinket(ModItems.FROST_STONE_ARTIFACT);
+		registerTrinket(ModItems.GD42_QUANTUM);
+		registerTrinket(ModItems.MK88_TABLET);
+		registerTrinket(ModItems.BRONZE_AXIOM_ARTIFACT);
 
 		// Registrar items que causan corrupción
 		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CURSED_SPEAR_OF_FI3W0);
@@ -100,8 +108,10 @@ public class FiwstoryMod implements ModInitializer {
 		// Registrar efectos de estado
 		ModStatusEffects.registerStatusEffects();
 		
-		// Registrar eventos de daño del Tomo Mágico
+		// Registrar eventos de daño del Tomo Mágico y nuevos artefactos
 		MagicTomeItem.registerDamageEvents();
+		MK88TabletArtifact.registerDamageEvents();
+		BronzeAxiomArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

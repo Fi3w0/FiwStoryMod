@@ -27,6 +27,9 @@ import com.fiw.fiwstory.item.custom.GoddessFlowerArtifact;
 import com.fiw.fiwstory.item.custom.MagicTomeItem;
 import com.fiw.fiwstory.item.custom.CorruptedMeatItem;
 import com.fiw.fiwstory.item.custom.FrostStoneArtifact;
+import com.fiw.fiwstory.item.custom.GD42QuantumArtifact;
+import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
+import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -111,6 +114,15 @@ public class ModItems {
 
 	public static final Item FROST_STONE_ARTIFACT = registerItem("frost_stone_artifact",
 			new FrostStoneArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item GD42_QUANTUM = registerItem("gd42_quantum",
+			new GD42QuantumArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item MK88_TABLET = registerItem("mk88_tablet",
+			new MK88TabletArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item BRONZE_AXIOM_ARTIFACT = registerItem("bronze_axiom_artifact",
+			new BronzeAxiomArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);
