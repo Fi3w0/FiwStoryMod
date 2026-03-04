@@ -36,3 +36,4 @@ gradle.properties.local
 # Fabric
 remappedSrc/
 remappedBin/gradle-wrapper.zip
+gradle-wrapper.zip
