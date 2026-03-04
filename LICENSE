@@ -1,62 +1,46 @@
-AVISO LEGAL IMPORTANTE - PROYECTO PERSONAL
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)
 
-Fiw Story Mod - Proyecto Personal para SMP
-Contexto: Mod personal creado específicamente para mi servidor SMP de Minecraft
+Copyright (c) 2024-2026 Fi3w0
 
-================================================================================
-🚫 ADVERTENCIAS CRÍTICAS:
-================================================================================
+=======================================================================
 
-1. TEXTURAS:
-   - TODAS las texturas son de terceros
-   - NO tengo derechos de autor sobre ninguna textura
-   - Uso únicamente para propósitos personales y no comerciales
-   - Eliminaré inmediatamente cualquier textura si el autor original contacta
+Eres libre de:
 
-2. CÓDIGO:
-   - 100% generado por IA (OpenCode CLI + DeepSeek V3.2 API)
-   - 0% ayuda humana en programación - puro vibecoding
-   - Sin garantías de funcionamiento
-   - Muchos bugs esperados - código generado automáticamente
+  Compartir — copiar y redistribuir el material en cualquier medio o formato.
+  Adaptar — remezclar, transformar y construir a partir del material.
 
-3. PROPOSITO:
-   - Proyecto personal para mi servidor SMP
-   - NO para distribución pública o comercial
-   - NO para uso en modpacks públicos
-   - Contexto y lore específicos de mi SMP
+Bajo las siguientes condiciones:
 
-================================================================================
-CONDICIONES DE USO:
-================================================================================
+  Atribución — Debes dar crédito apropiado a Fi3w0, proporcionar un enlace
+  a la licencia e indicar si se realizaron cambios. Puedes hacerlo de cualquier
+  manera razonable, pero no de manera que sugiera que el licenciante te respalda
+  a ti o al uso que haces del material.
 
-USO PERSONAL PERMITIDO:
-- Puedes clonar, forkear o modificar para uso personal
-- Puedes compilar y usar en tu propio Minecraft
-- Puedes crear ramas y hacer cambios (excepto en rama main)
+  No Comercial — No puedes utilizar el material con fines comerciales.
 
-PROHIBIDO:
-- Uso comercial o distribución con fines de lucro
-- Afirmar autoría del código (generado por IA)
-- Reclamar derechos sobre texturas (de terceros)
-- Modificar la rama main sin permiso explícito
+  CompartirIgual — Si remezclas, transformas o construyes a partir del material,
+  debes distribuir tu contribución bajo la misma licencia que el original.
 
-LIMITACIÓN DE RESPONSABILIDAD:
-Este software se proporciona "TAL CUAL", sin garantía de ningún tipo, expresa o
-implícita, incluyendo pero no limitado a garantías de comerciabilidad, idoneidad
-para un propósito particular y no infracción. En ningún caso los autores o
-titulares de derechos de autor serán responsables por cualquier reclamo, daño u
-otra responsabilidad, ya sea en una acción de contrato, agravio o de otro modo,
-que surja de, fuera de o en conexión con el software o el uso u otros tratos en
-el software.
+  Sin restricciones adicionales — No puedes aplicar términos legales ni medidas
+  tecnológicas que restrinjan legalmente a otros de hacer cualquier cosa que la
+  licencia permita.
 
-CONTACTO:
-Para consultas sobre el proyecto personal: fi3w0@github.com
-(Para temas de copyright de texturas: contactar a los autores originales)
+=======================================================================
 
-================================================================================
-CRÉDITOS:
-================================================================================
-- Código: 100% generado por DeepSeek V3.2 API con OpenCode Agents
-- Idea y contexto: Fi3w0 (para lore de SMP personal)
-- Texturas: Varios autores/orígenes (sin derechos retenidos)
-- Vibecoding puro - sin intervención humana en programación
+AVISOS ADICIONALES:
+
+  TEXTURAS: Las texturas incluidas en este proyecto son de terceros. Fi3w0 no
+  posee los derechos de autor sobre ellas. Su uso está limitado a propósitos
+  personales y no comerciales. Si eres el autor de alguna textura y deseas que
+  sea retirada, contacta al autor del proyecto.
+
+  SIN GARANTÍAS: Este software se distribuye "TAL CUAL", sin garantía de ningún
+  tipo. Fi3w0 no es responsable por daños derivados de su uso.
+
+=======================================================================
+
+Texto completo de la licencia:
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.es
+
+Para contacto: https://github.com/Fi3w0/FiwStoryMod

@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "id": "fiwstory",
   "version": "${version}",
-  "name": "Fiw Story [PERSONAL SMP MOD]",
-  "description": "⚠️ MOD PERSONAL - Código 100% AI - Texturas de terceros - Para lore de SMP específico",
+  "name": "Fiw Story",
+  "description": "Mod personal para el SMP de Fi3w0. Artefactos legendarios, sistema de corrupción, habilidades únicas y lore exclusivo del servidor.",
   "authors": [
-    "Fi3w0 (idea) + AI (código)"
+    "Fi3w0"
   ],
   "contact": {
     "homepage": "https://github.com/Fi3w0/FiwStoryMod",
     "sources": "https://github.com/Fi3w0/FiwStoryMod"
   },
-  "license": "Personal Use Only - See LICENSE",
+  "license": "CC-BY-NC-SA-4.0",
   "icon": "assets/fiwstory/icon.png",
   "environment": "*",
   "entrypoints": {
