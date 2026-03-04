@@ -85,10 +85,10 @@ public class PharaohDaggerArtifact extends SwordItem {
         }
         
         if (slot == EquipmentSlot.MAINHAND) {
-            // MOVEMENT_SPEED: +0.15 (ágil como una daga)
+            // MOVEMENT_SPEED: +5% (ágil como una daga)
             modifiers.put(EntityAttributes.GENERIC_MOVEMENT_SPEED,
-                new EntityAttributeModifier(MOVEMENT_SPEED_MODIFIER_ID, "Dagger movement speed", 0.15,
-                    EntityAttributeModifier.Operation.ADDITION));
+                new EntityAttributeModifier(MOVEMENT_SPEED_MODIFIER_ID, "Dagger movement speed", 0.05,
+                    EntityAttributeModifier.Operation.MULTIPLY_TOTAL));
             
             // LUCK: +5 (daga de la fortuna)
             modifiers.put(EntityAttributes.GENERIC_LUCK,

@@ -2,11 +2,8 @@ package com.fiw.fiwstory.item.custom;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.fiw.fiwstory.lib.TrinketHelper;
+import com.fiw.fiwstory.item.BaseArtifactItem;
 import dev.emi.trinkets.api.SlotReference;
-import dev.emi.trinkets.api.Trinket;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -14,22 +11,18 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class PharaohRingArtifact extends Item implements Trinket {
-
-    private static final UUID OFFHAND_UUID = UUID.fromString("C3D4E5F6-A7B8-4901-CD23-EF45AB678901");
+public class PharaohRingArtifact extends BaseArtifactItem {
 
     public PharaohRingArtifact(Settings settings) {
-        super(settings.maxCount(1).fireproof());
+        super(ArtifactType.ACCESSORY, ArtifactRarity.LEGENDARY, 2, 0, settings.maxCount(1).fireproof());
     }
 
     @Override
@@ -43,33 +36,32 @@ public class PharaohRingArtifact extends Item implements Trinket {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(Text.literal("«Anillo del Faraón»").formatted(Formatting.GOLD, Formatting.BOLD));
-        tooltip.add(Text.literal("Uno de los artefactos legendarios del Dios Faraón").formatted(Formatting.YELLOW, Formatting.ITALIC));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.literal("§6§oAnillo de poder divino§r").formatted(Formatting.GOLD));
-        tooltip.add(Text.literal("§7• Sientes la protección del desierto dorado§r").formatted(Formatting.GRAY));
-        tooltip.add(Text.literal("§7• La suerte del faraón te acompaña§r").formatted(Formatting.GRAY));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.literal("§c§l¡ITEM DE LORE IMPORTANTE!§r").formatted(Formatting.RED, Formatting.BOLD));
-        tooltip.add(Text.literal("§8«El poder del faraón reside en sus anillos»§r").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+    public String getArtifactDisplayName() { return "Anillo del Faraón"; }
+
+    @Override
+    public String getArtifactDescription() { return "Uno de los artefactos legendarios del Dios Faraón"; }
+
+    @Override
+    public List<String> getArtifactFeatures() {
+        return Arrays.asList(
+            "Sientes la protección del desierto dorado",
+            "La suerte del faraón te acompaña"
+        );
     }
 
-    // ========== VANILLA OFFHAND ==========
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
-        if (slot == EquipmentSlot.OFFHAND) {
-            return buildModifiers(OFFHAND_UUID);
-        }
-        return super.getAttributeModifiers(slot);
+    public String getArtifactQuote() { return "El poder del faraón reside en sus anillos"; }
+
+    @Override
+    public void onArtifactUse(World world, PlayerEntity player, ItemStack stack, Hand hand) {
+        // Accesorio pasivo
     }
 
-    // ========== TRINKETS API ==========
+    // ========== PASIVA: Fortuna Divina ==========
     @Override
-    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
+    public void onArtifactTick(ItemStack stack, World world, LivingEntity entity, int slot, boolean selected) {
+        if (world.isClient()) return;
         if (!(entity instanceof PlayerEntity player)) return;
-        if (TrinketHelper.handleCreativeDuplication(player, stack, slot)) return;
-        if (entity.getWorld().isClient()) return;
 
         // Fortuna Divina: mantener Luck I visible como efecto de estado
         if (!player.hasStatusEffect(StatusEffects.LUCK)) {
@@ -78,12 +70,9 @@ public class PharaohRingArtifact extends Item implements Trinket {
         }
     }
 
+    // ========== TRINKETS API ==========
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
-        return buildModifiers(uuid);
-    }
-
-    private Multimap<EntityAttribute, EntityAttributeModifier> buildModifiers(UUID uuid) {
         Multimap<EntityAttribute, EntityAttributeModifier> modifiers = HashMultimap.create();
         modifiers.put(EntityAttributes.GENERIC_ARMOR,
             new EntityAttributeModifier(uuid, "Pharaoh ring armor", 4.0, EntityAttributeModifier.Operation.ADDITION));

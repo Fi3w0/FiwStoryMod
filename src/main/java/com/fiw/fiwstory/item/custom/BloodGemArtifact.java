@@ -2,35 +2,34 @@ package com.fiw.fiwstory.item.custom;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.fiw.fiwstory.item.BaseArtifactItem;
 import com.fiw.fiwstory.lib.TrinketHelper;
 import dev.emi.trinkets.api.SlotReference;
-import dev.emi.trinkets.api.Trinket;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.entity.EquipmentSlot;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class BloodGemArtifact extends Item implements Trinket {
+public class BloodGemArtifact extends BaseArtifactItem {
 
-    private static final UUID OFFHAND_UUID = UUID.fromString("B2C3D4E5-F6A7-4890-BC12-DE34FA567890");
+    private static final int LIFESTEAL_COOLDOWN = 40; // 2 segundos
+    private static final Map<UUID, Long> lifeStealCooldowns = new ConcurrentHashMap<>();
 
     public BloodGemArtifact(Settings settings) {
-        super(settings.maxCount(1).fireproof());
+        super(ArtifactType.ACCESSORY, ArtifactRarity.LEGENDARY, 2, 0, settings.maxCount(1).fireproof());
     }
 
     @Override
@@ -44,41 +43,45 @@ public class BloodGemArtifact extends Item implements Trinket {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(Text.literal("«Gema de Sangre Divina»").formatted(Formatting.DARK_RED, Formatting.BOLD));
-        tooltip.add(Text.literal("Uno de los artefactos legendarios del Dios Faraón").formatted(Formatting.RED, Formatting.ITALIC));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.literal("§4§oHecha de sangre divina§r").formatted(Formatting.DARK_RED));
-        tooltip.add(Text.literal("§7• Sientes el poder divino que no te pertenece§r").formatted(Formatting.GRAY));
-        tooltip.add(Text.literal("§7• Energía vital concentrada§r").formatted(Formatting.GRAY));
-        tooltip.add(Text.literal(""));
-        tooltip.add(Text.literal("§c§l¡ITEM DE LORE IMPORTANTE!§r").formatted(Formatting.RED, Formatting.BOLD));
-        tooltip.add(Text.literal("§8«La sangre del faraón fluye eternamente»§r").formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
-    }
+    public String getArtifactDisplayName() { return "Gema de Sangre Divina"; }
 
-    // ========== VANILLA OFFHAND ==========
     @Override
-    public Multimap<EntityAttribute, EntityAttributeModifier> getAttributeModifiers(EquipmentSlot slot) {
-        if (slot == EquipmentSlot.OFFHAND) {
-            return buildModifiers(OFFHAND_UUID);
-        }
-        return super.getAttributeModifiers(slot);
-    }
+    public String getArtifactDescription() { return "Uno de los artefactos legendarios del Dios Faraón"; }
 
-    // ========== TRINKETS API ==========
     @Override
-    public void tick(ItemStack stack, SlotReference slot, LivingEntity entity) {
-        if (!(entity instanceof PlayerEntity player)) return;
-        TrinketHelper.handleCreativeDuplication(player, stack, slot);
+    public List<String> getArtifactFeatures() {
+        return Arrays.asList(
+            "Hecha de sangre divina",
+            "Energía vital concentrada"
+        );
     }
 
-    // ========== EVENTO: Robo de Vida (lifesteal 15%) ==========
+    @Override
+    public String getArtifactQuote() { return "La sangre del faraón fluye eternamente"; }
+
+    @Override
+    public void onArtifactUse(World world, PlayerEntity player, ItemStack stack, Hand hand) {
+        // Accesorio pasivo
+    }
+
+    @Override
+    public void onArtifactTick(ItemStack stack, World world, LivingEntity entity, int slot, boolean selected) {
+        // Lifesteal via registerDamageEvents
+    }
+
+    // ========== EVENTO: Robo de Vida (lifesteal 15%, cooldown 2s) ==========
     public static void registerDamageEvents() {
         ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
             if (entity.getWorld().isClient()) return true;
             if (!(source.getAttacker() instanceof PlayerEntity attacker)) return true;
             if (!TrinketHelper.hasArtifactOfType(attacker, BloodGemArtifact.class)) return true;
 
+            UUID uuid = attacker.getUuid();
+            long worldTime = entity.getWorld().getTime();
+            Long cdExp = lifeStealCooldowns.get(uuid);
+            if (cdExp != null && worldTime < cdExp) return true;
+
+            lifeStealCooldowns.put(uuid, worldTime + LIFESTEAL_COOLDOWN);
             float heal = amount * 0.15f;
             attacker.heal(heal);
 
@@ -91,21 +94,18 @@ public class BloodGemArtifact extends Item implements Trinket {
         });
     }
 
+    // ========== TRINKETS API ==========
     @Override
     public Multimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, SlotReference slot, LivingEntity entity, UUID uuid) {
-        return buildModifiers(uuid);
-    }
-
-    private Multimap<EntityAttribute, EntityAttributeModifier> buildModifiers(UUID uuid) {
         Multimap<EntityAttribute, EntityAttributeModifier> modifiers = HashMultimap.create();
         modifiers.put(EntityAttributes.GENERIC_MAX_HEALTH,
             new EntityAttributeModifier(uuid, "Blood gem max health", 4.0, EntityAttributeModifier.Operation.ADDITION));
         modifiers.put(EntityAttributes.GENERIC_ARMOR,
             new EntityAttributeModifier(uuid, "Blood gem armor", 2.0, EntityAttributeModifier.Operation.ADDITION));
         modifiers.put(EntityAttributes.GENERIC_ATTACK_DAMAGE,
-            new EntityAttributeModifier(uuid, "Blood gem max absorption", 2.0, EntityAttributeModifier.Operation.ADDITION));
+            new EntityAttributeModifier(uuid, "Blood gem attack damage", 2.0, EntityAttributeModifier.Operation.ADDITION));
         modifiers.put(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE,
-            new EntityAttributeModifier(uuid, "Blood gem knockback resistance", 2.0, EntityAttributeModifier.Operation.ADDITION));
+            new EntityAttributeModifier(uuid, "Blood gem knockback resistance", 0.10, EntityAttributeModifier.Operation.ADDITION));
         return modifiers;
     }
 }

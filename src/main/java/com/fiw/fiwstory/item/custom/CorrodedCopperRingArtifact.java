@@ -27,6 +27,7 @@ import net.minecraft.world.World;
 import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -56,8 +57,8 @@ public class CorrodedCopperRingArtifact extends BaseArtifactItem {
     private static final float STUN_CHANCE = 0.10f; // 10% chance de aturdimiento
     private static final float FAIL_CHANCE = 0.15f; // 15% chance de fallo
 
-    // Contador interno por jugador (NBT tag)
-    private static final String TICK_COUNTER_TAG = "fiwstory:corroded_ring_ticks";
+    // Per-player discharge timer
+    private static final Map<UUID, Long> nextDischargeTime = new ConcurrentHashMap<>();
 
     public CorrodedCopperRingArtifact(Settings settings) {
         super(ArtifactType.ACCESSORY, ArtifactRarity.RARE, 1, 0, settings);
@@ -119,14 +120,16 @@ public class CorrodedCopperRingArtifact extends BaseArtifactItem {
             return;
         }
 
-        // Contador interno optimizado
-        int tickCounter = stack.getOrCreateNbt().getInt(TICK_COUNTER_TAG);
-        tickCounter++;
-        stack.getOrCreateNbt().putInt(TICK_COUNTER_TAG, tickCounter);
-
-        if (tickCounter % DISCHARGE_INTERVAL_TICKS != 0) {
+        // Per-player discharge timer
+        UUID uuid = player.getUuid();
+        long worldTime = world.getTime();
+        Long nextDischarge = nextDischargeTime.get(uuid);
+        if (nextDischarge == null) {
+            nextDischargeTime.put(uuid, worldTime + DISCHARGE_INTERVAL_TICKS);
             return;
         }
+        if (worldTime < nextDischarge) return;
+        nextDischargeTime.put(uuid, worldTime + DISCHARGE_INTERVAL_TICKS);
 
         // 15% probabilidad de fallo
         if (FiwUtils.randomChance(FAIL_CHANCE)) {
