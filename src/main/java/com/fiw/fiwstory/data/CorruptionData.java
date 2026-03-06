@@ -89,38 +89,45 @@ public class CorruptionData extends PersistentState {
         if (hasCorruptItems) {
             // Incrementar tiempo con items corruptos
             data.corruptItemTime++;
-            
+
             // Calcular tiempo de activación aleatorio para este jugador
             if (data.activationTime == 0) {
-                // Establecer tiempo de activación aleatorio entre 30-90 minutos
-                data.activationTime = MIN_ACTIVATION_TIME + 
+                data.activationTime = MIN_ACTIVATION_TIME +
                     (player.getWorld().random.nextInt(MAX_ACTIVATION_TIME - MIN_ACTIVATION_TIME));
             }
-            
+
             // Verificar si se activa la corrupción permanente
             if (data.corruptItemTime >= data.activationTime && !data.corruptionActive) {
                 activateCorruption(player, data);
             }
-            
-            // Resetear timer de remoción si tenía items
+
+            // Resetear timer de remoción mientras tenga items corruptos
             data.removalTimer = 0;
             data.hadCorruptItemsLastTick = true;
-            
+
         } else if (data.hadCorruptItemsLastTick) {
-            // El jugador tenía items corruptos en el tick anterior pero no ahora
+            // Jugador ya no tiene items corruptos — cuenta regresiva para quitar corrupción.
+            // NO se limpia hadCorruptItemsLastTick aquí para que el contador
+            // siga incrementando cada tick en lugar de resetearse.
             data.removalTimer++;
-            data.hadCorruptItemsLastTick = false;
-            
+
             // Verificar si se debe remover la corrupción (15 segundos)
-            if (data.removalTimer >= REMOVAL_DELAY && data.corruptionActive) {
-                deactivateCorruption(player, data);
+            if (data.removalTimer >= REMOVAL_DELAY) {
+                if (data.corruptionActive) {
+                    deactivateCorruption(player, data); // limpia hadCorruptItemsLastTick dentro
+                } else {
+                    // No había corrupción activa, solo limpiar el tracking
+                    data.corruptItemTime = 0;
+                    data.activationTime = 0;
+                    data.removalTimer = 0;
+                    data.hadCorruptItemsLastTick = false;
+                }
             }
-            
+
         } else {
-            // Resetear todo si no hay items corruptos por un tiempo
+            // Nunca tuvo items corruptos (o fue limpiado) — nada que hacer
             data.corruptItemTime = 0;
             data.removalTimer = 0;
-            data.hadCorruptItemsLastTick = false;
         }
         
         // Marcar como dirty para guardar
@@ -280,10 +287,11 @@ public class CorruptionData extends PersistentState {
         data.corruptItemTime = 0;
         data.activationTime = 0; // Resetear para próxima activación aleatoria
         data.removalTimer = 0;
-        
+        data.hadCorruptItemsLastTick = false; // Necesario para salir del bucle de countdown
+
         // Remover efecto de corrupción
         CorruptionStatusEffect.removeFromPlayer(player);
-        
+
         // NO mensajes - los jugadores deben descubrir
     }
     

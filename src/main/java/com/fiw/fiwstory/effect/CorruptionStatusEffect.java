@@ -199,8 +199,8 @@ public class CorruptionStatusEffect extends StatusEffect {
         if (entity instanceof PlayerEntity player && !player.getWorld().isClient()) {
             int corruptionLevel = amplifier + 1;
             
-            // Ajustar vida máxima si es nivel 3-4
-            if (corruptionLevel >= 3 && corruptionLevel <= 4) {
+            // Ajustar vida máxima si es nivel 3-5
+            if (corruptionLevel >= 3) {
                 adjustMaxHealth(player, corruptionLevel);
             }
             
@@ -288,19 +288,19 @@ public class CorruptionStatusEffect extends StatusEffect {
         // Reducción basada en nivel (1-3 corazones)
         double reduction = CorruptionConstants.HEALTH_REDUCTION_PER_LEVEL * (corruptionLevel - 2);
         
-        // Verificar si ya aplicamos la reducción
-        net.minecraft.entity.attribute.EntityAttributeModifier existingModifier = 
-            maxHealthAttr.getModifier(CORRUPTION_HEALTH_MODIFIER_ID);
-        
-        if (existingModifier == null && reduction > 0) {
+        // Siempre eliminar el modificador anterior antes de aplicar el nuevo
+        // (evita stacking si el nivel cambia al re-aplicar el efecto)
+        maxHealthAttr.removeModifier(CORRUPTION_HEALTH_MODIFIER_ID);
+
+        if (reduction > 0) {
             maxHealthAttr.addPersistentModifier(new net.minecraft.entity.attribute.EntityAttributeModifier(
                 CORRUPTION_HEALTH_MODIFIER_ID,
                 "corruption_health_reduction",
                 -reduction,
                 net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADDITION
             ));
-            
-            // Ajustar vida actual si es necesario
+
+            // Ajustar vida actual si supera el nuevo máximo
             if (player.getHealth() > player.getMaxHealth()) {
                 player.setHealth(player.getMaxHealth());
             }
