@@ -52,7 +52,7 @@ public class MagicTomeItem extends Item {
     private static final int DOMINIO_DURATION = 60;  // 3 seconds
 
     // Damage values
-    private static final float DESMANTELAR_DAMAGE = 5.0f;
+    private static final float DESMANTELAR_DAMAGE = 10.0f;
     private static final float DESMANTELAR_RANGE = 10.0f;
     private static final float ARMOR_PENETRATION = 5.0f;
 
@@ -400,7 +400,7 @@ public class MagicTomeItem extends Item {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("§d§lHabilidades:§r"));
         tooltip.add(Text.literal("§7• §5Click derecho§7 — Desmantelar §8(3s CD)§r"));
-        tooltip.add(Text.literal("§7  Slash cortante 10 bloques, 5 daño, penetra armadura§r"));
+        tooltip.add(Text.literal("§7  Slash cortante 10 bloques, 10 daño (5 ♥), penetra armadura§r"));
         tooltip.add(Text.literal("§7• §5Agachado + Click§7 — Marca Corrupta §8(12s CD)§r"));
         tooltip.add(Text.literal("§7  Marca objetivo 6s, +daño recibido§r"));
         tooltip.add(Text.literal("§7• §5Offhand Click§7 — Dominio Fracturado §8(18s CD)§r"));
