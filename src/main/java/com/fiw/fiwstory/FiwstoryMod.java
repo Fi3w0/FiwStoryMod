@@ -83,7 +83,7 @@ public class FiwstoryMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Fiw Story Mod v1.4.2");
+		LOGGER.info("Initializing Fiw Story Mod v2.0.0");
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);

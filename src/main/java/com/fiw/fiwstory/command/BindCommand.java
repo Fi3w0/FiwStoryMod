@@ -1,229 +1,269 @@
 package com.fiw.fiwstory.command;
 
 import com.fiw.fiwstory.item.BaseArtifactItem;
+import com.fiw.fiwstory.item.BaseArtifactSwordItem;
 import com.fiw.fiwstory.lib.FiwNBT;
 import com.fiw.fiwstory.lib.FiwUtils;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
- * Comando para vincular artefactos a jugadores.
- * Sintaxis: /fiw bind <hand|item_id> <jugador>
- * Permisos: OPs level 2+
+ * Comandos para gestión de vínculos de artefactos.
+ *
+ * /fiw bind <jugador>    — vincula todos los artefactos del jugador a él mismo
+ * /fiw unbind            — desvincula el artefacto en tu mano
+ * /fiw unbind <jugador>  — desvincula todos los artefactos de un jugador
+ * /fiw list              — lista todos los jugadores online con sus artefactos y estado de bind
  */
 public class BindCommand {
-    
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher, 
-                               CommandRegistryAccess registryAccess, 
-                               CommandManager.RegistrationEnvironment environment) {
-        
+
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher,
+                                CommandRegistryAccess registryAccess,
+                                CommandManager.RegistrationEnvironment environment) {
+
         dispatcher.register(CommandManager.literal("fiw")
-            .requires(source -> source.hasPermissionLevel(2)) // OP level 2+
+            .requires(source -> source.hasPermissionLevel(2))
             .then(CommandManager.literal("bind")
                 .then(CommandManager.argument("target", EntityArgumentType.player())
-                    .executes(context -> bindItemInHand(context, EntityArgumentType.getPlayer(context, "target"))))
-                .then(CommandManager.argument("player", StringArgumentType.word())
-                    .executes(context -> bindItemInHandToPlayerName(context, StringArgumentType.getString(context, "player"))))
+                    .executes(context -> bindAllArtifacts(context, EntityArgumentType.getPlayer(context, "target"))))
             )
             .then(CommandManager.literal("unbind")
-                .executes(BindCommand::unbindItemInHand)
+                .executes(BindCommand::unbindFromHand)
+                .then(CommandManager.argument("target", EntityArgumentType.player())
+                    .executes(context -> unbindAllFromPlayer(context, EntityArgumentType.getPlayer(context, "target"))))
             )
-            .then(CommandManager.literal("bindinfo")
-                .executes(BindCommand::showBindInfo)
+            .then(CommandManager.literal("list")
+                .executes(BindCommand::listArtifacts)
             )
         );
     }
-    
-    /**
-     * Vincula el ítem en la mano del ejecutor al jugador especificado.
-     */
-    private static int bindItemInHand(CommandContext<ServerCommandSource> context, ServerPlayerEntity targetPlayer) 
-            throws CommandSyntaxException {
-        
-        ServerCommandSource source = context.getSource();
-        ServerPlayerEntity executor = source.getPlayerOrThrow();
-        ItemStack itemInHand = executor.getMainHandStack();
-        
-        return bindItemToPlayer(source, executor, itemInHand, targetPlayer);
+
+    // =========================================================================
+    //  Helpers
+    // =========================================================================
+
+    private static boolean isArtifact(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        Item item = stack.getItem();
+        return item instanceof BaseArtifactItem || item instanceof BaseArtifactSwordItem;
     }
-    
+
     /**
-     * Vincula el ítem en la mano del ejecutor al jugador por nombre.
+     * Recoge todos los ItemStack de artefactos de un jugador:
+     * inventario principal, slots de trinket y ender chest.
+     * Devuelve referencias directas a los stacks para que modificarlos
+     * sea efectivo sobre el inventario real.
      */
-    private static int bindItemInHandToPlayerName(CommandContext<ServerCommandSource> context, String playerName) 
-            throws CommandSyntaxException {
-        
+    private static List<ItemStack> collectArtifacts(ServerPlayerEntity player) {
+        List<ItemStack> result = new ArrayList<>();
+
+        // Inventario principal (hotbar + main + armor + offhand)
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack stack = player.getInventory().getStack(i);
+            if (isArtifact(stack)) result.add(stack);
+        }
+
+        // Slots de Trinkets (separados del inventario principal)
+        TrinketsApi.getTrinketComponent(player).ifPresent(component -> {
+            for (var entry : component.getAllEquipped()) {
+                ItemStack stack = entry.getRight();
+                if (isArtifact(stack)) result.add(stack);
+            }
+        });
+
+        // Ender chest
+        SimpleInventory enderChest = player.getEnderChestInventory();
+        for (int i = 0; i < enderChest.size(); i++) {
+            ItemStack stack = enderChest.getStack(i);
+            if (isArtifact(stack)) result.add(stack);
+        }
+
+        return result;
+    }
+
+    // =========================================================================
+    //  /fiw bind <target>
+    // =========================================================================
+
+    private static int bindAllArtifacts(CommandContext<ServerCommandSource> context,
+                                        ServerPlayerEntity target) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        ServerPlayerEntity executor = source.getPlayerOrThrow();
-        ItemStack itemInHand = executor.getMainHandStack();
-        
-        // Buscar jugador por nombre
-        ServerPlayerEntity targetPlayer = source.getServer().getPlayerManager().getPlayer(playerName);
-        if (targetPlayer == null) {
-            FiwUtils.sendErrorMessage(executor, "Jugador no encontrado: " + playerName);
+        String executorName = source.getName();
+        String targetName = target.getName().getString();
+        UUID targetUuid = target.getUuid();
+
+        List<ItemStack> artifacts = collectArtifacts(target);
+
+        if (artifacts.isEmpty()) {
+            source.sendFeedback(() -> Text.literal(
+                "§e[FiwStory] " + targetName + " no tiene artefactos en inventario, trinkets o ender chest."
+            ), false);
             return 0;
         }
-        
-        return bindItemToPlayer(source, executor, itemInHand, targetPlayer);
-    }
-    
-    /**
-     * Lógica común para vincular un ítem a un jugador.
-     */
-    private static int bindItemToPlayer(ServerCommandSource source, ServerPlayerEntity executor, 
-                                       ItemStack item, ServerPlayerEntity targetPlayer) {
-        
-        // Verificar que el ejecutor tenga un ítem en la mano
-        if (item.isEmpty()) {
-            FiwUtils.sendErrorMessage(executor, "Debes sostener un artefacto en tu mano principal.");
-            return 0;
+
+        StringBuilder names = new StringBuilder();
+        for (ItemStack stack : artifacts) {
+            FiwNBT.bindTo(stack, targetUuid, executorName);
+            if (names.length() > 0) names.append(", ");
+            names.append(stack.getName().getString());
         }
-        
-        // Verificar que el ítem sea un artefacto (opcional, pero recomendado)
-        if (!(item.getItem() instanceof BaseArtifactItem)) {
-            FiwUtils.sendWarningMessage(executor, "Este ítem no es un artefacto, pero se vinculará de todos modos.");
-        }
-        
-        // Obtener información
-        UUID targetUuid = targetPlayer.getUuid();
-        String targetName = targetPlayer.getName().getString();
-        String executorName = executor.getName().getString();
-        
-        // Vincular el ítem
-        FiwNBT.bindTo(item, targetUuid, executorName);
-        
-        // Mensajes de feedback
-        String itemName = item.getName().getString();
-        FiwUtils.sendSuccessMessage(executor, "Artefacto vinculado a " + targetName);
-        FiwUtils.sendInfoMessage(targetPlayer, executorName + " ha vinculado un artefacto a ti: " + itemName);
-        
-        // Log en consola del servidor
+
+        int count = artifacts.size();
+        String namesList = names.toString();
+        source.sendFeedback(() -> Text.literal(
+            "§a[FiwStory] Vinculados §f" + count + "§a artefactos a §f" + targetName + "§a: " + namesList
+        ), true);
+
+        FiwUtils.sendInfoMessage(target,
+            executorName + " ha vinculado tus artefactos (" + count + "): " + namesList);
+
         source.getServer().sendMessage(Text.literal(
-            "[FiwStory] " + executorName + " vinculó " + itemName + " a " + targetName
+            "[FiwStory] " + executorName + " vinculó " + count + " artefactos a " + targetName
         ));
-        
         return Command.SINGLE_SUCCESS;
     }
-    
-    /**
-     * Desvincula el ítem en la mano del ejecutor.
-     */
-    private static int unbindItemInHand(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+
+    // =========================================================================
+    //  /fiw unbind  (item en mano)
+    // =========================================================================
+
+    private static int unbindFromHand(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         ServerPlayerEntity executor = source.getPlayerOrThrow();
         ItemStack itemInHand = executor.getMainHandStack();
-        
-        // Verificar que el ejecutor tenga un ítem en la mano
+
         if (itemInHand.isEmpty()) {
             FiwUtils.sendErrorMessage(executor, "Debes sostener un artefacto en tu mano principal.");
             return 0;
         }
-        
-        // Verificar que el ítem esté vinculado
+
         if (!FiwNBT.isBound(itemInHand)) {
             FiwUtils.sendErrorMessage(executor, "Este artefacto no está vinculado.");
             return 0;
         }
-        
-        // Obtener información del vínculo anterior
+
         UUID previousOwner = FiwNBT.getBoundTo(itemInHand);
         String itemName = itemInHand.getName().getString();
         String executorName = executor.getName().getString();
-        
-        // Desvincular
+
         FiwNBT.unbind(itemInHand);
-        
-        // Mensajes de feedback
-        FiwUtils.sendSuccessMessage(executor, "Artefacto desvinculado.");
-        
-        // Notificar al dueño anterior si está en línea
+        FiwUtils.sendSuccessMessage(executor, "Artefacto desvinculado: " + itemName);
+
         if (previousOwner != null) {
-            ServerPlayerEntity previousOwnerPlayer = source.getServer().getPlayerManager().getPlayer(previousOwner);
-            if (previousOwnerPlayer != null && !previousOwnerPlayer.getUuid().equals(executor.getUuid())) {
-                FiwUtils.sendWarningMessage(previousOwnerPlayer, 
+            ServerPlayerEntity prev = source.getServer().getPlayerManager().getPlayer(previousOwner);
+            if (prev != null && !prev.getUuid().equals(executor.getUuid())) {
+                FiwUtils.sendWarningMessage(prev,
                     executorName + " ha desvinculado tu artefacto: " + itemName);
             }
         }
-        
-        // Log en consola del servidor
+
         source.getServer().sendMessage(Text.literal(
             "[FiwStory] " + executorName + " desvinculó " + itemName
         ));
-        
         return Command.SINGLE_SUCCESS;
     }
-    
-    /**
-     * Muestra información sobre el vínculo del ítem en la mano.
-     */
-    private static int showBindInfo(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+
+    // =========================================================================
+    //  /fiw unbind <target>
+    // =========================================================================
+
+    private static int unbindAllFromPlayer(CommandContext<ServerCommandSource> context,
+                                           ServerPlayerEntity target) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
-        ServerPlayerEntity executor = source.getPlayerOrThrow();
-        ItemStack itemInHand = executor.getMainHandStack();
-        
-        // Verificar que el ejecutor tenga un ítem en la mano
-        if (itemInHand.isEmpty()) {
-            FiwUtils.sendErrorMessage(executor, "Debes sostener un artefacto en tu mano principal.");
+        String executorName = source.getName();
+        String targetName = target.getName().getString();
+
+        List<ItemStack> artifacts = collectArtifacts(target);
+        int unbound = 0;
+        for (ItemStack stack : artifacts) {
+            if (FiwNBT.isBound(stack)) {
+                FiwNBT.unbind(stack);
+                unbound++;
+            }
+        }
+
+        if (unbound == 0) {
+            source.sendFeedback(() -> Text.literal(
+                "§e[FiwStory] " + targetName + " no tiene artefactos vinculados."
+            ), false);
             return 0;
         }
-        
-        // Verificar que el ítem esté vinculado
-        if (!FiwNBT.isBound(itemInHand)) {
-            FiwUtils.sendInfoMessage(executor, "Este artefacto no está vinculado.");
-            return Command.SINGLE_SUCCESS;
+
+        int finalUnbound = unbound;
+        source.sendFeedback(() -> Text.literal(
+            "§a[FiwStory] Desvinculados §f" + finalUnbound + "§a artefactos de §f" + targetName + "§a."
+        ), true);
+
+        FiwUtils.sendWarningMessage(target,
+            executorName + " ha desvinculado " + finalUnbound + " de tus artefactos.");
+        return Command.SINGLE_SUCCESS;
+    }
+
+    // =========================================================================
+    //  /fiw list
+    // =========================================================================
+
+    private static int listArtifacts(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        List<ServerPlayerEntity> players = source.getServer().getPlayerManager().getPlayerList();
+
+        if (players.isEmpty()) {
+            source.sendFeedback(() -> Text.literal("§e[FiwStory] No hay jugadores en línea."), false);
+            return 0;
         }
-        
-        // Obtener información del vínculo
-        UUID boundTo = FiwNBT.getBoundTo(itemInHand);
-        long bindDate = FiwNBT.getLong(itemInHand, FiwNBT.BIND_DATE, 0);
-        String bindBy = FiwNBT.getString(itemInHand, FiwNBT.BIND_BY, "Desconocido");
-        int bindLevel = FiwNBT.getInt(itemInHand, FiwNBT.BIND_LEVEL, 1);
-        
-        // Buscar nombre del jugador vinculado
-        String boundPlayerName = "Desconocido";
-        if (boundTo != null) {
-            ServerPlayerEntity boundPlayer = source.getServer().getPlayerManager().getPlayer(boundTo);
-            if (boundPlayer != null) {
-                boundPlayerName = boundPlayer.getName().getString();
-            } else {
-                // Intentar obtener del cache o mostrar UUID
-                boundPlayerName = "UUID: " + boundTo.toString().substring(0, 8) + "...";
+
+        source.sendFeedback(() -> Text.literal("§6§l=== Artefactos (online) ==="), false);
+        source.sendFeedback(() -> Text.literal("§7Jugador | Artefacto | Bind"), false);
+
+        for (ServerPlayerEntity player : players) {
+            String playerName = player.getName().getString();
+            List<ItemStack> artifacts = collectArtifacts(player);
+
+            if (artifacts.isEmpty()) {
+                source.sendFeedback(() -> Text.literal("§f" + playerName + " §8| §7(sin artefactos)"), false);
+                continue;
+            }
+
+            for (ItemStack stack : artifacts) {
+                String itemName = stack.getName().getString();
+                boolean bound = FiwNBT.isBound(stack);
+
+                String bindStr;
+                if (bound) {
+                    UUID boundTo = FiwNBT.getBoundTo(stack);
+                    ServerPlayerEntity boundPlayer = source.getServer().getPlayerManager().getPlayer(boundTo);
+                    String boundName = boundPlayer != null
+                        ? boundPlayer.getName().getString()
+                        : boundTo.toString().substring(0, 8) + "...";
+                    bindStr = "§aSí §7(" + boundName + ")";
+                } else {
+                    bindStr = "§cNo";
+                }
+
+                // Lambda needs effectively-final vars
+                final String pn = playerName;
+                final String in = itemName;
+                final String bs = bindStr;
+                source.sendFeedback(() -> Text.literal("§f" + pn + " §8| §e" + in + " §8| §7Bind: " + bs), false);
             }
         }
-        
-        // Formatear fecha
-        String bindDateStr = "Desconocida";
-        if (bindDate > 0) {
-            long daysAgo = (System.currentTimeMillis() - bindDate) / (1000 * 60 * 60 * 24);
-            if (daysAgo == 0) {
-                bindDateStr = "Hoy";
-            } else if (daysAgo == 1) {
-                bindDateStr = "Ayer";
-            } else {
-                bindDateStr = "Hace " + daysAgo + " días";
-            }
-        }
-        
-        // Mostrar información
-        FiwUtils.sendInfoMessage(executor, "=== Información de Vínculo ===");
-        FiwUtils.sendInfoMessage(executor, "Artefacto: " + itemInHand.getName().getString());
-        FiwUtils.sendInfoMessage(executor, "Vinculado a: " + boundPlayerName);
-        FiwUtils.sendInfoMessage(executor, "Vinculado por: " + bindBy);
-        FiwUtils.sendInfoMessage(executor, "Fecha: " + bindDateStr);
-        FiwUtils.sendInfoMessage(executor, "Nivel de vínculo: " + bindLevel);
-        
+
         return Command.SINGLE_SUCCESS;
     }
 }
