@@ -2,7 +2,7 @@
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.92.7-blue.svg)](https://fabricmc.net/)
-[![Versión](https://img.shields.io/badge/Versión-1.4.2-orange.svg)](https://github.com/Fi3w0/FiwStoryMod)
+[![Versión](https://img.shields.io/badge/Versión-2.1.2-orange.svg)](https://github.com/Fi3w0/FiwStoryMod)
 [![Idioma](https://img.shields.io/badge/Idioma-Español-red.svg)](https://github.com/Fi3w0/FiwStoryMod)
 [![Licencia](https://img.shields.io/badge/Licencia-CC--BY--NC--SA--4.0-lightgrey.svg)](LICENSE)
 
@@ -84,8 +84,9 @@ Artefactos legendarios pertenecientes al lore del Dios Faraón. Se equipan en sl
 
 | Arma | Tipo | Habilidades |
 |---|---|---|
-| **Lanza Maldita de Fi3w0** | Lanza legendaria | Dash Riptide (CD: 1.5s), World Barrage — 12 slashes rotativos (requiere Gafas, CD: 10s) |
-| **Espada del Caos** | Espada legendaria | Aura de caos, habilidades activas |
+| **Lanza Maldita de Fi3w0** | Lanza legendaria | Dash Riptide (CD: 1.5s), World Barrage — 20 arc slashes carmesís en 4s con Wither I (requiere Gafas, CD: 10s) |
+| **Espada del Caos** | Espada legendaria | Aura de Caos — Strength II + Slowness en área (CD: 60s); Arc Slash — barrido 180° 8 dmg (CD: 8s) |
+| **Espada Mgshtraklar** | Espada legendaria | Blood Steal — lifesteal 10% pasivo en mainhand (CD: 2s); Crimson Slash — 3 garras de energía 10 dmg c/u + explosión final (CD: 10s); anti-duelo con Gema de Sangre |
 | **Hoja Atemporal** | Espada mítica | Acceso al Vacío, indestructible |
 | **Tomo Mágico** | Grimorio | Desmantelar, Marca Corrupta, Dominio Fracturado |
 
@@ -102,6 +103,12 @@ Artefactos legendarios pertenecientes al lore del Dios Faraón. Se equipan en sl
 | **Flor de la Diosa** | Juicio de la naturaleza, protección de emergencia |
 | **Piedra de Hielo** | Aura de escarcha y ralentización |
 | **Piedra Filosófica Mejorada** | Versión avanzada con generación de mineral |
+
+### Economía del Servidor
+
+| Item | Descripción |
+|---|---|
+| **Moneda de Skyxern** | Mineral de origen desconocido, moneda universal por acuerdo tácito. Stackable ×64. |
 
 ### Items de Sistema
 
@@ -129,6 +136,10 @@ Todos los artefactos son compatibles con la [Trinkets API](https://modrinth.com/
 ### Sistema de Bind (Soulbound)
 
 Los artefactos pueden vincularse a un jugador específico. Un artefacto vinculado no puede ser usado por otro jugador y aplica penalizaciones si lo intenta.
+
+### Sistema Anti-Duelo (Blood)
+
+La **Espada Mgshtraklar** y la **Gema de Sangre Divina** son incompatibles. Si un jugador tiene ambos items en cualquier ubicación (inventario, offhand, trinkets, ender chest) recibe 1♥ de daño mágico cada 2 segundos hasta retirar uno de ellos.
 
 ### Dimensión Timeless Void
 
