@@ -16,7 +16,9 @@ public class SkyxernCoinItem extends Item {
 
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(Text.literal("§7Moneda oficial de Skyxern§r"));
-        tooltip.add(Text.literal("§8Úsala para comerciar y apostar§r"));
+        tooltip.add(Text.literal("§7Mineral de origen desconocido. Aparece de forma aleatoria§r"));
+        tooltip.add(Text.literal("§7en distintos mundos sin patrón ni explicación. Su escasez§r"));
+        tooltip.add(Text.literal("§7extrema lo convirtió en moneda universal por acuerdo tácito§r"));
+        tooltip.add(Text.literal("§7— todo el mundo lo acepta porque nadie tiene suficiente.§r"));
     }
 }
