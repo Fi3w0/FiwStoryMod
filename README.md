@@ -88,7 +88,7 @@ Artefactos legendarios pertenecientes al lore del Dios Faraón. Se equipan en sl
 | **Espada del Caos** | Espada legendaria | Aura de Caos — Strength II + Slowness en área (CD: 60s); Arc Slash — barrido 180° 8 dmg (CD: 8s) |
 | **Espada Mgshtraklar** | Espada legendaria | Blood Steal — lifesteal 10% pasivo en mainhand (CD: 2s); Crimson Slash — 3 garras de energía 10 dmg c/u + explosión final (CD: 10s); anti-duelo con Gema de Sangre |
 | **Hoja Atemporal** | Espada mítica | Acceso al Vacío, indestructible |
-| **Tomo Mágico** | Grimorio | Desmantelar, Marca Corrupta, Dominio Fracturado |
+| **Tomo Mágico** | Grimorio | Desmantelar — slash 10 bloques **20 dmg mágico** (ignora armadura, CD: 3s); Marca Corrupta — debuff armadura + 10% daño extra (CD: 12s); Dominio Fracturado — refleja 30% dmg 3s (CD: 18s) |
 
 ### Armadura
 

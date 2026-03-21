@@ -38,7 +38,6 @@ public class MagicTomeItem extends Item {
     // UUIDs for attribute modifiers
     private static final UUID OFFHAND_DAMAGE_UUID = UUID.fromString("F6A7B8C9-D0E1-4234-FA56-BC78DE901234");
     private static final UUID OFFHAND_SPEED_UUID = UUID.fromString("F7B8C9D0-E1F2-4345-AB67-CD89EF012345");
-    private static final UUID ARMOR_PEN_UUID = UUID.fromString("11223344-5566-4778-8899-AABBCCDDEEFF");
     private static final UUID MARCA_ARMOR_UUID = UUID.fromString("22334455-6677-4889-99AA-BBCCDDEEFF00");
     private static final UUID MARCA_TOUGHNESS_UUID = UUID.fromString("33445566-7788-4990-AABB-CCDDEEFF0011");
 
@@ -52,9 +51,8 @@ public class MagicTomeItem extends Item {
     private static final int DOMINIO_DURATION = 60;  // 3 seconds
 
     // Damage values
-    private static final float DESMANTELAR_DAMAGE = 10.0f;
+    private static final float DESMANTELAR_DAMAGE = 20.0f; // magic, ignora armadura
     private static final float DESMANTELAR_RANGE = 10.0f;
-    private static final float ARMOR_PENETRATION = 5.0f;
 
     // Tracking active effects (entity UUID -> expiry world time)
     private static final Map<UUID, Long> markedEntities = new ConcurrentHashMap<>();
@@ -202,18 +200,7 @@ public class MagicTomeItem extends Item {
             double perpDist = closest.distanceTo(target.getPos().add(0, target.getHeight() / 2, 0));
             if (perpDist > 2.0) continue;
 
-            // Apply armor penetration
-            var armorAttr = target.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
-            if (armorAttr != null) {
-                armorAttr.addTemporaryModifier(new EntityAttributeModifier(
-                    ARMOR_PEN_UUID, "Desmantelar penetration", -ARMOR_PENETRATION, EntityAttributeModifier.Operation.ADDITION));
-            }
-
-            target.damage(player.getDamageSources().playerAttack(player), DESMANTELAR_DAMAGE);
-
-            if (armorAttr != null) {
-                armorAttr.removeModifier(ARMOR_PEN_UUID);
-            }
+            target.damage(player.getDamageSources().magic(), DESMANTELAR_DAMAGE);
 
             // Sukuna-style hit particles: cross-shaped burst on target
             double tx = target.getX();
@@ -400,7 +387,7 @@ public class MagicTomeItem extends Item {
         tooltip.add(Text.literal(""));
         tooltip.add(Text.literal("§d§lHabilidades:§r"));
         tooltip.add(Text.literal("§7• §5Click derecho§7 — Desmantelar §8(3s CD)§r"));
-        tooltip.add(Text.literal("§7  Slash cortante 10 bloques, 10 daño (5 ♥), penetra armadura§r"));
+        tooltip.add(Text.literal("§7  Slash cortante 10 bloques, §520 daño mágico§7 (10 ♥), ignora armadura§r"));
         tooltip.add(Text.literal("§7• §5Agachado + Click§7 — Marca Corrupta §8(12s CD)§r"));
         tooltip.add(Text.literal("§7  Marca objetivo 6s, +daño recibido§r"));
         tooltip.add(Text.literal("§7• §5Offhand Click§7 — Dominio Fracturado §8(18s CD)§r"));
