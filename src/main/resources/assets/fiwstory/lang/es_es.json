@@ -101,5 +101,9 @@
   "item.fiwstory.skyxern_coin": "Moneda de Skyxern",
   "item.fiwstory.skyxern_coin.tooltip.line1": "Moneda del servidor Skyxern SMP",
   "item.fiwstory.skyxern_coin.tooltip.line2": "Usada en tiendas y el casino",
-  "item.fiwstory.skyxern_coin.tooltip.line3": "Ítem de economía del servidor"
+  "item.fiwstory.skyxern_coin.tooltip.line3": "Ítem de economía del servidor",
+
+  "item.fiwstory.espada_elfica": "Espada de Elfo Real",
+  "item.fiwstory.hacha_relampago": "Hacha de Relámpago",
+  "item.fiwstory.espada_frostmorn": "FrostMorn"
 }

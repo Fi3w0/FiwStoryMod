@@ -36,6 +36,9 @@ import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
 import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
 import com.fiw.fiwstory.item.custom.BloodGemArtifact;
 import com.fiw.fiwstory.item.custom.EscarabajoArtifact;
+import com.fiw.fiwstory.item.custom.EspadaElficaArtifact;
+import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
+import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -80,13 +83,16 @@ public class FiwstoryMod implements ModInitializer {
 		entries.add(ModItems.SKYXERN_STONE_ARTIFACT);
 		entries.add(ModItems.SKYXERN_LEGACY_ARTIFACT);
 		entries.add(ModItems.ESPADA_MGSHTRAKLAR);
+		entries.add(ModItems.ESPADA_ELFICA);
+		entries.add(ModItems.HACHA_RELAMPAGO);
+		entries.add(ModItems.ESPADA_FROSTMORN);
 		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Fiw Story Mod v2.1.2");
+		LOGGER.info("Initializing Fiw Story Mod v2.1.3");
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);
@@ -128,6 +134,7 @@ public class FiwstoryMod implements ModInitializer {
 		BloodGemArtifact.registerDamageEvents();
 		EspadaMgshtraklar.registerDamageEvents();
 		EscarabajoArtifact.registerDamageEvents();
+		HachaRelampagoArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

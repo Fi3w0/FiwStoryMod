@@ -1,5 +1,7 @@
 package com.fiw.fiwstory.lib;
 
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -19,6 +21,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -1215,6 +1218,241 @@ public class FiwEffects {
         double vertArc = Math.sin(Math.PI * t); // parabola 0→1→0
         double hy = origin.y + yOffset + height * vertArc;
         return new Vec3d(hx, hy, hz);
+    }
+
+    // ========== CHAIN LIGHTNING (Espada Elfica) ==========
+
+    /**
+     * Fires a chain lightning from the player in their look direction.
+     * Hits up to 3 targets, chaining to the nearest unvisited entity each bounce.
+     * The caster is immune (skipped). Each target receives a cosmetic lightning bolt + ELECTRIC_SPARK arc.
+     */
+    public static void executeChainLightning(ServerWorld world, PlayerEntity caster) {
+        Vec3d look = caster.getRotationVec(1.0f);
+        float radius = 12.0f;
+        int maxChain = 3;
+        float damage = 10.0f;
+
+        Box searchBox = Box.of(caster.getPos(), radius * 2, radius * 2, radius * 2);
+        List<LivingEntity> candidates = world.getEntitiesByClass(LivingEntity.class, searchBox,
+            e -> e != caster && e.isAlive()
+                && e.squaredDistanceTo(caster) <= (double) radius * radius);
+
+        if (candidates.isEmpty()) return;
+
+        // Sort by distance from caster
+        candidates.sort((a, b) -> Double.compare(a.squaredDistanceTo(caster), b.squaredDistanceTo(caster)));
+
+        // First target: nearest entity in the forward hemisphere
+        LivingEntity first = null;
+        for (LivingEntity c : candidates) {
+            Vec3d toTarget = c.getPos().subtract(caster.getPos()).normalize();
+            if (toTarget.dotProduct(look) > 0) {
+                first = c;
+                break;
+            }
+        }
+        if (first == null) return;
+
+        // Build chain via nearest-unvisited bounce
+        List<LivingEntity> chain = new ArrayList<>();
+        Set<UUID> visited = new HashSet<>();
+        chain.add(first);
+        visited.add(first.getUuid());
+
+        for (int i = 0; i < maxChain - 1 && chain.size() < candidates.size(); i++) {
+            LivingEntity last = chain.get(chain.size() - 1);
+            LivingEntity next = null;
+            double best = Double.MAX_VALUE;
+            for (LivingEntity c : candidates) {
+                if (visited.contains(c.getUuid())) continue;
+                double d = c.squaredDistanceTo(last);
+                if (d < best) { best = d; next = c; }
+            }
+            if (next != null) {
+                chain.add(next);
+                visited.add(next.getUuid());
+            }
+        }
+
+        world.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
+            SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 1.0f, 1.0f);
+
+        // Strike each target, drawing jagged arc from the previous link
+        LivingEntity prev = caster;
+        for (LivingEntity entity : chain) {
+            Vec3d from = new Vec3d(prev.getX(), prev.getY() + prev.getHeight() * 0.8, prev.getZ());
+            Vec3d to   = new Vec3d(entity.getX(), entity.getY() + entity.getHeight() * 0.8, entity.getZ());
+
+            // Jagged ELECTRIC_SPARK particle arc
+            int steps = (int)(from.distanceTo(to) * 4);
+            for (int s = 0; s <= steps; s++) {
+                double frac = (steps == 0) ? 0.0 : (double) s / steps;
+                Random rnd = RANDOM.get();
+                double jx = (rnd.nextDouble() - 0.5) * 0.5;
+                double jy = (rnd.nextDouble() - 0.5) * 0.5;
+                double jz = (rnd.nextDouble() - 0.5) * 0.5;
+                world.spawnParticles(ParticleTypes.ELECTRIC_SPARK,
+                    from.x + (to.x - from.x) * frac + jx,
+                    from.y + (to.y - from.y) * frac + jy,
+                    from.z + (to.z - from.z) * frac + jz,
+                    1, 0, 0, 0, 0);
+            }
+
+            // Damage (armor-bypassing magic)
+            entity.damage(world.getDamageSources().magic(), damage);
+
+            // Cosmetic lightning bolt (no fire, no mob conversion)
+            LightningEntity bolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
+            bolt.setCosmetic(true);
+            bolt.setPosition(entity.getX(), entity.getY(), entity.getZ());
+            world.spawnEntity(bolt);
+
+            // Impact ELECTRIC_SPARK burst
+            world.spawnParticles(ParticleTypes.ELECTRIC_SPARK,
+                entity.getX(), entity.getY() + entity.getHeight() / 2.0, entity.getZ(),
+                15, 0.4, 0.4, 0.4, 0.12);
+
+            prev = entity;
+        }
+    }
+
+    // ========== FROST BEAM (EspadaFrostmorn) ==========
+
+    /**
+     * Fires a frost beam in the player's current look direction.
+     * Windup: 10 ticks (0.5s) with gathering ice particles and elder guardian sound.
+     * Beam: 30 ticks (1.5s) locked to fire direction; SNOWFLAKE + END_ROD particles.
+     * Entities hit every 3 ticks take 1.0 magic damage and are frozen (Slowness 127 + Mining Fatigue).
+     * Player is immobilized during beam firing.
+     */
+    public static void executeFrostBeam(ServerWorld world, PlayerEntity player) {
+        Vec3d origin = player.getEyePos();
+        Vec3d dir    = player.getRotationVec(1.0f).normalize();
+        double beamLen = 15.0;
+        float beamWidth = 0.9f;
+        Vec3d dest = origin.add(dir.multiply(beamLen));
+
+        // Windup sound
+        world.playSound(null, player.getX(), player.getY(), player.getZ(),
+            SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, SoundCategory.PLAYERS, 0.8f, 1.0f);
+
+        // Windup particles (10 ticks): ice spiraling inward to origin
+        for (int t = 0; t < 10; t++) {
+            final int tick = t;
+            scheduleDelayedTask(world, tick, () -> {
+                if (!player.isAlive()) return;
+                double progress = tick / 10.0;
+                double gatherRadius = 1.5 * (1.0 - progress);
+                for (int i = 0; i < 4; i++) {
+                    double angle = Math.toRadians(i * 90.0 + tick * 20.0);
+                    world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                        origin.x + Math.cos(angle) * gatherRadius,
+                        origin.y + Math.sin(angle) * gatherRadius * 0.4,
+                        origin.z + Math.sin(angle) * gatherRadius,
+                        1, 0, 0, 0, 0);
+                }
+                world.spawnParticles(ParticleTypes.END_ROD,
+                    origin.x, origin.y, origin.z,
+                    1 + (int)(progress * 3), 0.06, 0.06, 0.06, 0.0);
+            });
+        }
+
+        // Freeze player at beam start
+        scheduleDelayedTask(world, 10, () -> {
+            if (player.isAlive()) {
+                player.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SLOWNESS, 30, 200, false, false));
+            }
+        });
+
+        // Beam ticks (ticks 10–39 inclusive = 30 ticks of beam)
+        for (int t = 0; t < 30; t++) {
+            final int beamTick = t;
+            scheduleDelayedTask(world, 10 + t, () -> {
+                if (!player.isAlive()) return;
+
+                // Outer SNOWFLAKE layer (sparse, slight spread)
+                int outerSteps = (int)(beamLen * 3);
+                for (int s = 0; s <= outerSteps; s++) {
+                    double tl = (double) s / outerSteps;
+                    world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                        origin.x + dir.x * beamLen * tl,
+                        origin.y + dir.y * beamLen * tl,
+                        origin.z + dir.z * beamLen * tl,
+                        1, 0.08, 0.08, 0.08, 0.0);
+                }
+
+                // Inner END_ROD core (dense, zero spread — solid beam look)
+                int coreSteps = (int)(beamLen * 7);
+                for (int s = 0; s <= coreSteps; s++) {
+                    double tl = (double) s / coreSteps;
+                    world.spawnParticles(ParticleTypes.END_ROD,
+                        origin.x + dir.x * beamLen * tl,
+                        origin.y + dir.y * beamLen * tl,
+                        origin.z + dir.z * beamLen * tl,
+                        1, 0, 0, 0, 0);
+                }
+
+                // Muzzle flash
+                world.spawnParticles(ParticleTypes.FLASH, origin.x, origin.y, origin.z, 1, 0, 0, 0, 0);
+
+                // Impact burst at beam endpoint
+                world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                    dest.x, dest.y, dest.z, 4, 0.25, 0.25, 0.25, 0.0);
+
+                // Looping beam hum every 8 ticks
+                if (beamTick % 8 == 0) {
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.PLAYERS, 0.5f, 0.9f);
+                }
+
+                // Damage check every 3 ticks
+                if (beamTick % 3 == 0) {
+                    Box broad = new Box(
+                        Math.min(origin.x, dest.x) - beamWidth, Math.min(origin.y, dest.y) - 1.5,
+                        Math.min(origin.z, dest.z) - beamWidth,
+                        Math.max(origin.x, dest.x) + beamWidth, Math.max(origin.y, dest.y) + 1.5,
+                        Math.max(origin.z, dest.z) + beamWidth);
+                    List<LivingEntity> victims = world.getEntitiesByClass(LivingEntity.class, broad,
+                        e -> e != player && e.isAlive() && isOnBeam(
+                            new Vec3d(e.getX(), e.getY() + e.getHeight() / 2.0, e.getZ()),
+                            origin, dir, beamLen, beamWidth));
+                    for (LivingEntity victim : victims) {
+                        victim.damage(world.getDamageSources().magic(), 1.0f);
+                        // Freeze: Slowness 127 + Mining Fatigue II for 3 seconds
+                        victim.addStatusEffect(new StatusEffectInstance(
+                            StatusEffects.SLOWNESS, 60, 127, false, false));
+                        victim.addStatusEffect(new StatusEffectInstance(
+                            StatusEffects.MINING_FATIGUE, 60, 1, false, false));
+                        // Freeze particle burst on hit
+                        world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2.0, victim.getZ(),
+                            5, 0.3, 0.3, 0.3, 0.0);
+                        world.spawnParticles(ParticleTypes.CLOUD,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2.0, victim.getZ(),
+                            2, 0.3, 0.3, 0.3, 0.0);
+                    }
+                }
+            });
+        }
+
+        // Beam shutdown: glass break sound + snowflake burst
+        scheduleDelayedTask(world, 40, () -> {
+            world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 0.8f, 1.0f);
+            world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                origin.x, origin.y, origin.z, 15, 0.3, 0.3, 0.3, 0.1);
+        });
+    }
+
+    /** Returns true if point is within beamWidth of the beam line segment [origin, origin + dir*len]. */
+    private static boolean isOnBeam(Vec3d point, Vec3d origin, Vec3d dir, double len, float width) {
+        Vec3d toPoint = point.subtract(origin);
+        double proj = toPoint.dotProduct(dir);
+        if (proj < 0 || proj > len) return false;
+        Vec3d closest = origin.add(dir.multiply(proj));
+        return closest.squaredDistanceTo(point) <= (double) width * width;
     }
 
 }
