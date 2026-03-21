@@ -584,13 +584,14 @@ public class FiwEffects {
     }
     
     /**
-     * Programa la secuencia de slashes.
+     * Programa la secuencia de slashes del World Barrage (Dismantle reworked).
+     * 10 ondas × 2 slashes = 20 slashes en 4 segundos. Cada slash es un mini arc visual.
+     * Daño: 3.5f por slash (~70 raw total). En práctica 4-6 conectan por posición aleatoria.
      */
     private static void scheduleWorldBarrageSequence(ServerWorld serverWorld, PlayerEntity player, LivingEntity target) {
-        // Dismantle: 8 ondas de 2 slashes cada 4 ticks = 16 slashes totales en ~1.6s
-        final int WAVES = 8;
+        final int WAVES = 10;
         final int SLASHES_PER_WAVE = 2;
-        final int WAVE_DELAY_TICKS = 4; // 0.2s entre ondas
+        final int WAVE_DELAY_TICKS = 8; // 0.4s entre ondas → 4s en total
 
         for (int wave = 0; wave < WAVES; wave++) {
             final int w = wave;
@@ -601,44 +602,46 @@ public class FiwEffects {
                 Vec3d targetPos = target.getPos();
 
                 for (int s = 0; s < SLASHES_PER_WAVE; s++) {
-                    // Posición aleatoria alrededor del objetivo
-                    double ox = (random.nextDouble() * 6.0) - 3.0; // -3 a +3
-                    double oy = random.nextDouble() * 2.0;          // 0 a +2
-                    double oz = (random.nextDouble() * 6.0) - 3.0; // -3 a +3
-                    Vec3d slashPos = targetPos.add(ox, oy, oz);
+                    // Posición aleatoria alrededor del objetivo (±2 bloques)
+                    double ox = (random.nextDouble() * 4.0) - 2.0;
+                    double oz = (random.nextDouble() * 4.0) - 2.0;
+                    Vec3d slashPos = targetPos.add(ox, 0, oz);
 
-                    // Partículas del slash
-                    spawnDismantleSlashParticles(serverWorld, slashPos);
+                    // Ángulo de roll aleatorio (0-360°) para slashes caóticos y diagonales
+                    double rollDeg = random.nextDouble() * 360.0;
 
-                    // Sonido suave por slash
+                    // Mini arc slash visual (mismo estilo que Arc Slash de la Espada del Caos)
+                    spawnMiniArcSlash(serverWorld, slashPos, rollDeg);
+
+                    // Sonido por slash con pitch ligeramente aleatorio
                     serverWorld.playSound(null, slashPos.x, slashPos.y, slashPos.z,
                         SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
-                        0.4f, 0.7f + random.nextFloat() * 0.5f);
+                        0.5f, 0.8f + random.nextFloat() * 0.5f);
 
-                    // Daño a entidades cercanas al punto de slash
-                    Box hitBox = new Box(slashPos.x - 0.9, slashPos.y - 0.5, slashPos.z - 0.9,
-                                        slashPos.x + 0.9, slashPos.y + 1.2, slashPos.z + 0.9);
+                    // Daño: 3.5f raw por slash, penetración de armadura del 25% contemplada
+                    Box hitBox = new Box(slashPos.x - 1.5, slashPos.y - 0.3, slashPos.z - 1.5,
+                                        slashPos.x + 1.5, slashPos.y + 2.0, slashPos.z + 1.5);
                     for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
                             e -> e != player && e.isAlive())) {
-                        victim.damage(player.getDamageSources().playerAttack(player), 1.0f);
+                        victim.damage(player.getDamageSources().playerAttack(player), 3.5f);
                         serverWorld.spawnParticles(ParticleTypes.CRIT,
                             victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
-                            8, 0.3, 0.3, 0.3, 0.1);
+                            8, 0.3, 0.3, 0.3, 0.15);
                     }
                 }
             });
         }
 
-        // Tras el último slash: Wither I (3s) + sonido final
+        // Tras el último slash: Wither I (4s) + sonido de impacto final
         scheduleDelayedTask(serverWorld, WAVES * WAVE_DELAY_TICKS + 2, () -> {
             if (!player.isAlive()) return;
 
             serverWorld.playSound(null, target.getX(), target.getY(), target.getZ(),
-                SoundEvents.ENTITY_WITHER_AMBIENT, SoundCategory.PLAYERS, 0.6f, 0.6f);
+                SoundEvents.ENTITY_WITHER_AMBIENT, SoundCategory.PLAYERS, 0.5f, 0.6f);
 
             if (target.isAlive()) {
                 target.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.WITHER, 60, 0, false, true // Wither I, 3 segundos
+                    StatusEffects.WITHER, 80, 0, false, true // Wither I, 4 segundos
                 ));
             }
         });
@@ -903,12 +906,45 @@ public class FiwEffects {
     }
 
     /**
-     * Partículas visuales para cada slash del Dismantle (World Barrage rework).
+     * Genera un mini arc slash visual de 90° centrado en {@code center} con roll aleatorio.
+     * Usa las mismas capas de partículas que el Arc Slash de la Espada del Caos.
      */
-    private static void spawnDismantleSlashParticles(ServerWorld world, Vec3d pos) {
-        world.spawnParticles(ParticleTypes.SWEEP_ATTACK, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
-        world.spawnParticles(ParticleTypes.CRIT, pos.x, pos.y, pos.z, 5, 0.2, 0.2, 0.2, 0.1);
-        world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y, pos.z, 3, 0.15, 0.15, 0.15, 0.0);
+    private static void spawnMiniArcSlash(ServerWorld world, Vec3d center, double rollDeg) {
+        double rollRad = Math.toRadians(rollDeg);
+        Vec3d fwd   = new Vec3d(Math.cos(rollRad), 0, Math.sin(rollRad));
+        Vec3d right = new Vec3d(-fwd.z, 0, fwd.x);
+
+        final float arc     = 90f;
+        final float radius  = 1.5f;
+        final float yOffset = 0.9f;
+        final float height  = 0.35f;
+        final int   points  = 10;
+
+        for (int pi = 0; pi <= points; pi++) {
+            double progress = (double) pi / points;
+            double thetaDeg = -arc / 2.0 + progress * arc; // -45 a +45
+            Vec3d pos = miniArcPoint(center, fwd, right, thetaDeg, progress, radius, yOffset, height);
+
+            world.spawnParticles(ParticleTypes.SWEEP_ATTACK,   pos.x, pos.y, pos.z, 1, 0,    0,    0,    0);
+            world.spawnParticles(ParticleTypes.CRIT,           pos.x, pos.y, pos.z, 3, 0.05, 0.05, 0.05, 0.15);
+            world.spawnParticles(ParticleTypes.ENCHANTED_HIT,  pos.x, pos.y, pos.z, 2, 0.05, 0.05, 0.05, 0.10);
+            world.spawnParticles(ParticleTypes.LARGE_SMOKE,    pos.x, pos.y, pos.z, 1, 0.05, 0.05, 0.05, 0);
+        }
+    }
+
+    /**
+     * Calcula un punto en el mini arco en coordenadas world-space.
+     * Misma lógica que {@link #playerArcPoint} pero parametrizada para el mini slash.
+     */
+    private static Vec3d miniArcPoint(Vec3d center, Vec3d fwd, Vec3d right,
+                                      double thetaDeg, double t,
+                                      float radius, float yOffset, float height) {
+        double theta = Math.toRadians(thetaDeg);
+        double hx = center.x + radius * (Math.cos(theta) * fwd.x + Math.sin(theta) * right.x);
+        double hz = center.z + radius * (Math.cos(theta) * fwd.z + Math.sin(theta) * right.z);
+        double vertArc = Math.sin(Math.PI * t); // parábola 0→1→0
+        double hy = center.y + yOffset + height * vertArc;
+        return new Vec3d(hx, hy, hz);
     }
 
     // ========== HABILIDAD ARC SLASH (ESPADA DEL CAOS) ==========
