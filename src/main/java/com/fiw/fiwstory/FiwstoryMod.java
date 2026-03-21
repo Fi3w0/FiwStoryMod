@@ -33,6 +33,7 @@ import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
 import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernStoneArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
+import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
 import com.fiw.fiwstory.item.custom.BloodGemArtifact;
 import com.fiw.fiwstory.item.custom.EscarabajoArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
@@ -78,6 +79,7 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.BRONZE_AXIOM_ARTIFACT);
 		entries.add(ModItems.SKYXERN_STONE_ARTIFACT);
 		entries.add(ModItems.SKYXERN_LEGACY_ARTIFACT);
+		entries.add(ModItems.ESPADA_MGSHTRAKLAR);
 		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
@@ -124,6 +126,7 @@ public class FiwstoryMod implements ModInitializer {
 		SkyxernStoneArtifact.registerDamageEvents();
 		SkyxernLegacyArtifact.registerDamageEvents();
 		BloodGemArtifact.registerDamageEvents();
+		EspadaMgshtraklar.registerDamageEvents();
 		EscarabajoArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();

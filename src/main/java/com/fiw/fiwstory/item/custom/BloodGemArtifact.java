@@ -3,6 +3,8 @@ package com.fiw.fiwstory.item.custom;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.fiw.fiwstory.item.BaseArtifactItem;
+import com.fiw.fiwstory.lib.FiwEffects;
+import com.fiw.fiwstory.lib.FiwUtils;
 import com.fiw.fiwstory.lib.TrinketHelper;
 import dev.emi.trinkets.api.SlotReference;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -14,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -64,9 +67,20 @@ public class BloodGemArtifact extends BaseArtifactItem {
         // Accesorio pasivo
     }
 
+    private static final int CONFLICT_CHECK_INTERVAL = 40; // cada 2s
+
     @Override
     public void onArtifactTick(ItemStack stack, World world, LivingEntity entity, int slot, boolean selected) {
-        // Lifesteal via registerDamageEvents
+        if (!world.isClient() && entity instanceof PlayerEntity player) {
+            if (world.getTime() % CONFLICT_CHECK_INTERVAL == 0) {
+                if (FiwUtils.hasItemAnywhere(player, EspadaMgshtraklar.class)) {
+                    player.damage(player.getDamageSources().magic(), 2.0f);
+                    FiwEffects.spawnParticlesAroundEntity(player, ParticleTypes.SOUL_FIRE_FLAME, 10, 1.0);
+                    player.sendMessage(
+                        Text.literal("§4§lLa sangre divina rechaza la duplicidad§r"), false);
+                }
+            }
+        }
     }
 
     // ========== EVENTO: Robo de Vida (lifesteal 15%, cooldown 2s) ==========

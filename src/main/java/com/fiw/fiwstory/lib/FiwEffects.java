@@ -5,8 +5,10 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import org.joml.Vector3f;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -945,6 +947,157 @@ public class FiwEffects {
         double vertArc = Math.sin(Math.PI * t); // parábola 0→1→0
         double hy = center.y + yOffset + height * vertArc;
         return new Vec3d(hx, hy, hz);
+    }
+
+    // ========== HABILIDAD CRIMSON SLASH (ESPADA MGSHTRAKLAR) ==========
+
+    /**
+     * Lanza 3 garras de energía carmesí consecutivas en la dirección del jugador.
+     * Adaptado de CrimsonSlashGoal para uso por jugadores.
+     * Daño: 10.0 por garra (magic, bypass de armadura). Explosión final: 15.0 con falloff.
+     */
+    public static void executeCrimsonSlash(ServerWorld serverWorld, PlayerEntity player) {
+        if (player == null || !player.isAlive()) return;
+
+        Vec3d look = player.getRotationVec(1.0f);
+        final Vec3d clawDir = new Vec3d(look.x, 0, look.z).normalize();
+        final Vec3d startPos = player.getPos().add(0, 0.3, 0);
+
+        final double clawSpeed   = 1.2;  // bloques/tick
+        final int ticksPerClaw   = 10;   // 12 bloques / 1.2 = 10 ticks
+        final int delayBetween   = 10;   // ticks entre garras
+        final float clawDamage   = 10.0f;
+        final float explosionDmg = 15.0f;
+        final float explosionRad = 5.0f;
+        final int clawCount      = 3;
+
+        // Sonido inicial
+        serverWorld.playSound(null, startPos.x, startPos.y, startPos.z,
+            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.5f, 0.6f);
+
+        for (int c = 0; c < clawCount; c++) {
+            final int clawIndex  = c;
+            final double clawSz  = 1.0 + c * 0.5;
+            final int clawStart  = c * delayBetween;
+            final boolean isLast = (c == clawCount - 1);
+
+            // Sonido de lanzamiento para garras 2 y 3
+            if (c > 0) {
+                scheduleDelayedTask(serverWorld, clawStart, () -> {
+                    if (!player.isAlive()) return;
+                    serverWorld.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
+                        1.5f, 0.6f + clawIndex * 0.1f);
+                });
+            }
+
+            // Posición mutable de la garra (array de 1 elemento para mutabilidad en lambda)
+            final Vec3d[] clawPos = {startPos};
+            final Set<UUID> hitByThisClaw = new HashSet<>();
+
+            for (int tick = 1; tick <= ticksPerClaw; tick++) {
+                final boolean isLastTick = (tick == ticksPerClaw);
+                scheduleDelayedTask(serverWorld, clawStart + tick, () -> {
+                    if (!player.isAlive()) return;
+
+                    clawPos[0] = clawPos[0].add(clawDir.multiply(clawSpeed));
+                    Vec3d pos = clawPos[0];
+
+                    // Partículas de la garra
+                    spawnCrimsonClawParticles(serverWorld, pos, clawDir, clawSz);
+
+                    // Daño (magic — 10% armor bypass como en el jefe original)
+                    double hw = clawSz * 1.0;
+                    Box hitBox = new Box(pos.x - hw, pos.y - 0.5, pos.z - hw,
+                                        pos.x + hw, pos.y + 2.5, pos.z + hw);
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive() && !hitByThisClaw.contains(e.getUuid()))) {
+                        victim.damage(serverWorld.getDamageSources().magic(), clawDamage);
+                        hitByThisClaw.add(victim.getUuid());
+                    }
+
+                    // Explosión al final de la última garra
+                    if (isLastTick && isLast) {
+                        spawnCrimsonExplosion(serverWorld, pos, explosionRad, explosionDmg, player);
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Partículas de la garra carmesí: suelo + abanico vertical (de CrimsonSlashGoal).
+     */
+    private static void spawnCrimsonClawParticles(ServerWorld world, Vec3d pos, Vec3d clawDir, double clawSize) {
+        Vec3d perp = new Vec3d(-clawDir.z, 0, clawDir.x);
+        double halfWidth = clawSize * 0.8;
+
+        // Rastro en el suelo
+        for (double w = -halfWidth; w <= halfWidth; w += 0.4) {
+            Vec3d p = pos.add(perp.multiply(w));
+            world.spawnParticles(ParticleTypes.CRIT,
+                p.x, p.y + 0.05, p.z, 1, 0.05, 0.0, 0.05, 0.0);
+            world.spawnParticles(new DustParticleEffect(new Vector3f(0.8f, 0.0f, 0.3f), 1.2f),
+                p.x, p.y + 0.1, p.z, 1, 0.05, 0.0, 0.05, 0.0);
+        }
+
+        // Abanico vertical
+        double fanHeight = 1.5 + clawSize * 0.4;
+        for (double h = 0.5; h <= fanHeight; h += 0.4) {
+            world.spawnParticles(new DustParticleEffect(new Vector3f(0.9f, 0.0f, 0.2f), 1.0f),
+                pos.x, pos.y + h, pos.z, 1, 0.05, 0.0, 0.05, 0.0);
+            world.spawnParticles(ParticleTypes.CRIT,
+                pos.x, pos.y + h, pos.z, 1, 0.04, 0.0, 0.04, 0.0);
+        }
+    }
+
+    /**
+     * Explosión carmesí al final del Crimson Slash (de CrimsonSlashGoal.triggerExplosion).
+     */
+    private static void spawnCrimsonExplosion(ServerWorld world, Vec3d pos,
+                                               float radius, float damage, PlayerEntity attacker) {
+        // Visuals
+        world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER,
+            pos.x, pos.y, pos.z, 2, 0.3, 0.3, 0.3, 0.0);
+        double fs = radius * 0.4;
+        world.spawnParticles(ParticleTypes.FLAME,
+            pos.x, pos.y, pos.z, 50, fs, radius * 0.5, fs, 0.15);
+        world.spawnParticles(new DustParticleEffect(new Vector3f(0.7f, 0.0f, 0.2f), 2.0f),
+            pos.x, pos.y, pos.z, 30, radius * 0.3, radius * 0.3, radius * 0.3, 0.0);
+        world.spawnParticles(ParticleTypes.LAVA,
+            pos.x, pos.y, pos.z, 15, radius * 0.2, radius * 0.2, radius * 0.2, 0.0);
+
+        // Anillos de FLAME ascendentes
+        for (double h = 0; h <= radius; h += 0.5) {
+            double ringR = radius * Math.sin(Math.PI * h / radius);
+            int N = Math.max(4, (int)(ringR * 4));
+            for (int i = 0; i < N; i++) {
+                double angle = Math.toRadians(360.0 / N * i);
+                world.spawnParticles(ParticleTypes.FLAME,
+                    pos.x + Math.cos(angle) * ringR, pos.y + h, pos.z + Math.sin(angle) * ringR,
+                    1, 0.05, 0.05, 0.05, 0.0);
+            }
+        }
+
+        // Sonidos
+        world.playSound(null, pos.x, pos.y, pos.z,
+            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 2.0f, 0.7f);
+        world.playSound(null, pos.x, pos.y, pos.z,
+            SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.PLAYERS, 1.2f, 0.5f);
+
+        // Daño con falloff por distancia
+        Box blastBox = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
+                               pos.x + radius, pos.y + radius, pos.z + radius);
+        for (LivingEntity victim : world.getEntitiesByClass(LivingEntity.class, blastBox,
+                e -> e != attacker && e.isAlive())) {
+            double dist = victim.getPos().distanceTo(pos);
+            if (dist > radius) continue;
+            float falloff = (float)(1.0 - dist / radius);
+            victim.damage(world.getDamageSources().magic(), damage * falloff);
+            Vec3d knock = victim.getPos().subtract(pos).normalize().multiply(1.8 * falloff);
+            victim.addVelocity(knock.x, 0.8 * falloff, knock.z);
+            victim.velocityModified = true;
+        }
     }
 
     // ========== HABILIDAD ARC SLASH (ESPADA DEL CAOS) ==========

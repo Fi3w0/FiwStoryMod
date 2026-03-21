@@ -33,6 +33,7 @@ import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernStoneArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernCoinItem;
+import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -132,6 +133,10 @@ public class ModItems {
 
 	public static final Item SKYXERN_LEGACY_ARTIFACT = registerItem("skyxern_legacy_artifact",
 			new SkyxernLegacyArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	// === Espada Mgshtraklar ===
+	public static final Item ESPADA_MGSHTRAKLAR = registerItem("espada_mgshtraklar",
+			new EspadaMgshtraklar(null, 5, -2.4f, new Item.Settings().maxCount(1).fireproof()));
 
 	// === Moneda del servidor ===
 	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",
