@@ -78,12 +78,13 @@ public class FiwstoryMod implements ModInitializer {
 			entries.add(ModItems.BRONZE_AXIOM_ARTIFACT);
 		entries.add(ModItems.SKYXERN_STONE_ARTIFACT);
 		entries.add(ModItems.SKYXERN_LEGACY_ARTIFACT);
+		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
 
 	@Override
 	public void onInitialize() {
-		LOGGER.info("Initializing Fiw Story Mod v2.0.0");
+		LOGGER.info("Initializing Fiw Story Mod v2.1.1");
 
 		ModItems.registerModItems();
 		Registry.register(Registries.ITEM_GROUP, new Identifier(MOD_ID, "main"), FIWSTORY_GROUP);

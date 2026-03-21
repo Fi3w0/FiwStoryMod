@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
@@ -33,7 +34,7 @@ public class FiwEffects {
     private static final ThreadLocal<Random> RANDOM = ThreadLocal.withInitial(Random::new);
 
     // ── Tick Scheduler ──────────────────────────────────────────────────────────
-    private static final ArrayList<ScheduledTask> TASK_QUEUE = new ArrayList<>();
+    private static final CopyOnWriteArrayList<ScheduledTask> TASK_QUEUE = new CopyOnWriteArrayList<>();
     private static boolean tickListenerRegistered = false;
 
     private static class ScheduledTask {
@@ -51,6 +52,7 @@ public class FiwEffects {
             ServerTickEvents.END_SERVER_TICK.register(server -> {
                 long now = System.currentTimeMillis();
                 TASK_QUEUE.removeIf(t -> {
+                    if (t == null) return true;
                     if (t.runAtMs <= now) {
                         try { t.task.run(); } catch (Exception e) { /* swallow */ }
                         return true;
@@ -648,6 +650,7 @@ public class FiwEffects {
      * En producción, usaríamos un sistema de tick scheduler.
      */
     private static void scheduleDelayedTask(ServerWorld serverWorld, int delayTicks, Runnable task) {
+        if (task == null) return;
         ensureTickListenerRegistered();
         long delayMs = delayTicks * 50L; // 1 tick = 50ms a 20 TPS
         TASK_QUEUE.add(new ScheduledTask(System.currentTimeMillis() + delayMs, task));
