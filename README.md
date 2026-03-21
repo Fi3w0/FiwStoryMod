@@ -84,7 +84,7 @@ Artefactos legendarios pertenecientes al lore del Dios Faraón. Se equipan en sl
 
 | Arma | Tipo | Habilidades |
 |---|---|---|
-| **Lanza Maldita de Fi3w0** | Lanza legendaria | Dash Riptide (CD: 1.5s), World Barrage — 20 arc slashes carmesís en 4s con Wither I (requiere Gafas, CD: 10s) |
+| **Lanza Maldita de Fi3w0** | Lanza legendaria | Dash Riptide (CD: 1.5s), World Barrage — 20 arc slashes en 4s, **7 dmg mágico c/u** (ignora armadura), Wither II 5s al final (requiere Gafas, CD: 10s) |
 | **Espada del Caos** | Espada legendaria | Aura de Caos — Strength II + Slowness en área (CD: 60s); Arc Slash — barrido 180° 8 dmg (CD: 8s) |
 | **Espada Mgshtraklar** | Espada legendaria | Blood Steal — lifesteal 10% pasivo en mainhand (CD: 2s); Crimson Slash — 3 garras de energía 10 dmg c/u + explosión final (CD: 10s); anti-duelo con Gema de Sangre |
 | **Hoja Atemporal** | Espada mítica | Acceso al Vacío, indestructible |

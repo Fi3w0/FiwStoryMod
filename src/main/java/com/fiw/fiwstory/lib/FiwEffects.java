@@ -591,7 +591,8 @@ public class FiwEffects {
     /**
      * Programa la secuencia de slashes del World Barrage (Dismantle reworked).
      * 10 ondas × 2 slashes = 20 slashes en 4 segundos. Cada slash es un mini arc visual.
-     * Daño: 3.5f por slash (~70 raw total). En práctica 4-6 conectan por posición aleatoria.
+     * Daño: 7.0f mágico por slash (~140 raw total). En práctica 5-8 conectan → 35-56 daño mágico real.
+     * Daño mágico: ignora armadura del objetivo.
      */
     private static void scheduleWorldBarrageSequence(ServerWorld serverWorld, PlayerEntity player, LivingEntity target) {
         final int WAVES = 10;
@@ -623,12 +624,12 @@ public class FiwEffects {
                         SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
                         0.5f, 0.8f + random.nextFloat() * 0.5f);
 
-                    // Daño: 3.5f raw por slash, penetración de armadura del 25% contemplada
+                    // Daño: 7.0f mágico por slash (ignora armadura)
                     Box hitBox = new Box(slashPos.x - 1.5, slashPos.y - 0.3, slashPos.z - 1.5,
                                         slashPos.x + 1.5, slashPos.y + 2.0, slashPos.z + 1.5);
                     for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
                             e -> e != player && e.isAlive())) {
-                        victim.damage(player.getDamageSources().playerAttack(player), 3.5f);
+                        victim.damage(serverWorld.getDamageSources().magic(), 7.0f);
                         serverWorld.spawnParticles(ParticleTypes.CRIT,
                             victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
                             8, 0.3, 0.3, 0.3, 0.15);
@@ -646,7 +647,7 @@ public class FiwEffects {
 
             if (target.isAlive()) {
                 target.addStatusEffect(new StatusEffectInstance(
-                    StatusEffects.WITHER, 80, 0, false, true // Wither I, 4 segundos
+                    StatusEffects.WITHER, 100, 1, false, true // Wither II, 5 segundos
                 ));
             }
         });
