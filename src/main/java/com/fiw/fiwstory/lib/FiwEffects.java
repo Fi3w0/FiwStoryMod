@@ -15,9 +15,11 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
+import java.util.UUID;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
@@ -29,6 +31,35 @@ public class FiwEffects {
     
     // Random thread-safe para efectos
     private static final ThreadLocal<Random> RANDOM = ThreadLocal.withInitial(Random::new);
+
+    // ── Tick Scheduler ──────────────────────────────────────────────────────────
+    private static final ArrayList<ScheduledTask> TASK_QUEUE = new ArrayList<>();
+    private static boolean tickListenerRegistered = false;
+
+    private static class ScheduledTask {
+        final long runAtMs;
+        final Runnable task;
+        ScheduledTask(long runAtMs, Runnable task) {
+            this.runAtMs = runAtMs;
+            this.task = task;
+        }
+    }
+
+    private static void ensureTickListenerRegistered() {
+        if (!tickListenerRegistered) {
+            tickListenerRegistered = true;
+            ServerTickEvents.END_SERVER_TICK.register(server -> {
+                long now = System.currentTimeMillis();
+                TASK_QUEUE.removeIf(t -> {
+                    if (t.runAtMs <= now) {
+                        try { t.task.run(); } catch (Exception e) { /* swallow */ }
+                        return true;
+                    }
+                    return false;
+                });
+            });
+        }
+    }
     
     /**
      * Aplica un efecto de estado a una entidad con duración y nivel.
@@ -508,15 +539,23 @@ public class FiwEffects {
         if (player == null || target == null || player.getWorld().isClient()) {
             return;
         }
-        
+
         World world = player.getWorld();
-        
-        // 1. Setup inicial
+        if (!(world instanceof ServerWorld serverWorld)) return;
+
+        // 1. Mensaje de activación
         worldBarrageSetup(player);
-        
-        // 2. Ejecutar slashes rotativos (en secuencia)
-        // Usaremos un sistema de ticks para la secuencia
-        scheduleWorldBarrageSequence(player, target);
+
+        // 2. Teletransporte inmediato detrás del objetivo
+        Vec3d targetLook = target.getRotationVec(1.0f);
+        Vec3d behindPos = target.getPos().subtract(targetLook.multiply(2.0));
+        behindPos = new Vec3d(behindPos.x, target.getY(), behindPos.z);
+        player.requestTeleport(behindPos.x, behindPos.y, behindPos.z);
+        playSoundAtEntity(player, SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
+        spawnParticlesAroundEntity(player, ParticleTypes.DRAGON_BREATH, 25, 1.0);
+
+        // 3. Programar 16 slashes estilo Dismantle (Sukuna)
+        scheduleWorldBarrageSequence(serverWorld, player, target);
     }
     
     /**
@@ -545,34 +584,62 @@ public class FiwEffects {
     /**
      * Programa la secuencia de slashes.
      */
-    private static void scheduleWorldBarrageSequence(PlayerEntity player, LivingEntity target) {
-        World world = player.getWorld();
-        
-        if (world instanceof net.minecraft.server.world.ServerWorld serverWorld) {
-            // Ángulos de rotación para los slashes (12 slashes como en MythicMobs)
-            int[] slashAngles = {0, 30, 60, 90, 120, 150, 180, -30, -60, -90, -120, -150};
-            
-            // Usar un sistema de ticks para programar las tareas
-            for (int i = 0; i < slashAngles.length; i++) {
-                final int angle = slashAngles[i];
-                final int delayTicks = 8 + (i * 3); // 8 ticks inicial + 3 por cada slash
-                
-                // Programar tarea con delay usando el scheduler del server
-                scheduleDelayedTask(serverWorld, delayTicks, () -> {
-                    if (player.isAlive() && target.isAlive()) {
-                        executeRotatingSlash(player, target, angle);
+    private static void scheduleWorldBarrageSequence(ServerWorld serverWorld, PlayerEntity player, LivingEntity target) {
+        // Dismantle: 8 ondas de 2 slashes cada 4 ticks = 16 slashes totales en ~1.6s
+        final int WAVES = 8;
+        final int SLASHES_PER_WAVE = 2;
+        final int WAVE_DELAY_TICKS = 4; // 0.2s entre ondas
+
+        for (int wave = 0; wave < WAVES; wave++) {
+            final int w = wave;
+            scheduleDelayedTask(serverWorld, w * WAVE_DELAY_TICKS, () -> {
+                if (!player.isAlive() || !target.isAlive()) return;
+
+                Random random = RANDOM.get();
+                Vec3d targetPos = target.getPos();
+
+                for (int s = 0; s < SLASHES_PER_WAVE; s++) {
+                    // Posición aleatoria alrededor del objetivo
+                    double ox = (random.nextDouble() * 6.0) - 3.0; // -3 a +3
+                    double oy = random.nextDouble() * 2.0;          // 0 a +2
+                    double oz = (random.nextDouble() * 6.0) - 3.0; // -3 a +3
+                    Vec3d slashPos = targetPos.add(ox, oy, oz);
+
+                    // Partículas del slash
+                    spawnDismantleSlashParticles(serverWorld, slashPos);
+
+                    // Sonido suave por slash
+                    serverWorld.playSound(null, slashPos.x, slashPos.y, slashPos.z,
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
+                        0.4f, 0.7f + random.nextFloat() * 0.5f);
+
+                    // Daño a entidades cercanas al punto de slash
+                    Box hitBox = new Box(slashPos.x - 0.9, slashPos.y - 0.5, slashPos.z - 0.9,
+                                        slashPos.x + 0.9, slashPos.y + 1.2, slashPos.z + 0.9);
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive())) {
+                        victim.damage(player.getDamageSources().playerAttack(player), 1.0f);
+                        serverWorld.spawnParticles(ParticleTypes.CRIT,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            8, 0.3, 0.3, 0.3, 0.1);
                     }
-                });
-            }
-            
-            // Programar teletransporte final y daño
-            final int finalDelay = 8 + (slashAngles.length * 3) + 5;
-            scheduleDelayedTask(serverWorld, finalDelay, () -> {
-                if (player.isAlive() && target.isAlive()) {
-                    worldBarrageFinale(player, target);
                 }
             });
         }
+
+        // Tras el último slash: Wither I (3s) + sonido final
+        scheduleDelayedTask(serverWorld, WAVES * WAVE_DELAY_TICKS + 2, () -> {
+            if (!player.isAlive()) return;
+
+            serverWorld.playSound(null, target.getX(), target.getY(), target.getZ(),
+                SoundEvents.ENTITY_WITHER_AMBIENT, SoundCategory.PLAYERS, 0.6f, 0.6f);
+
+            if (target.isAlive()) {
+                target.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.WITHER, 60, 0, false, true // Wither I, 3 segundos
+                ));
+            }
+        });
     }
     
     /**
@@ -581,9 +648,9 @@ public class FiwEffects {
      * En producción, usaríamos un sistema de tick scheduler.
      */
     private static void scheduleDelayedTask(ServerWorld serverWorld, int delayTicks, Runnable task) {
-        // Ejecutar inmediatamente para testing
-        // En una implementación real, usaríamos serverWorld.getServer().executeDelayed()
-        serverWorld.getServer().execute(task);
+        ensureTickListenerRegistered();
+        long delayMs = delayTicks * 50L; // 1 tick = 50ms a 20 TPS
+        TASK_QUEUE.add(new ScheduledTask(System.currentTimeMillis() + delayMs, task));
     }
     
     /**
@@ -831,6 +898,131 @@ public class FiwEffects {
             );
         }
     }
-    
+
+    /**
+     * Partículas visuales para cada slash del Dismantle (World Barrage rework).
+     */
+    private static void spawnDismantleSlashParticles(ServerWorld world, Vec3d pos) {
+        world.spawnParticles(ParticleTypes.SWEEP_ATTACK, pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+        world.spawnParticles(ParticleTypes.CRIT, pos.x, pos.y, pos.z, 5, 0.2, 0.2, 0.2, 0.1);
+        world.spawnParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y, pos.z, 3, 0.15, 0.15, 0.15, 0.0);
+    }
+
+    // ========== HABILIDAD ARC SLASH (ESPADA DEL CAOS) ==========
+
+    /**
+     * Ejecuta el Arc Slash — barre un arco de 180° frente al jugador en 6 ticks.
+     * Daño: 8.0 por entidad (cada entidad solo golpeada una vez por slash).
+     * Adaptado de ArcSlashGoal para uso por jugadores.
+     */
+    public static void executeArcSlash(ServerWorld serverWorld, PlayerEntity player) {
+        if (player == null || !player.isAlive()) return;
+
+        final float arc = 180f;
+        final float radius = 4.0f;
+        final float damage = 8.0f;
+        final int duration = 6;
+        final int points = 28;
+        final float yOffset = 1.1f;
+        final float height = 0.8f;
+        final float hitRadius = 1.0f;
+
+        // Bloquear orientación al inicio del slash
+        Vec3d fwd = player.getRotationVec(1.0f);
+        final Vec3d forward = new Vec3d(fwd.x, 0, fwd.z).normalize();
+        final Vec3d right = new Vec3d(-forward.z, 0, forward.x);
+        final Vec3d origin = player.getPos();
+
+        // Set de entidades ya golpeadas (compartido entre ticks del barrido)
+        Set<UUID> alreadyHit = new HashSet<>();
+
+        // Sonido de inicio del slash
+        serverWorld.playSound(null, origin.x, origin.y, origin.z,
+            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.5f, 0.85f);
+
+        // Programar cada tick del barrido
+        for (int tick = 1; tick <= duration; tick++) {
+            final int t = tick;
+            scheduleDelayedTask(serverWorld, tick, () -> {
+                if (!player.isAlive()) return;
+
+                double prevT = (double)(t - 1) / duration;
+                double currT = (double) t / duration;
+                int iStart = (int)(prevT * points);
+                int iEnd   = Math.min(points, (int)(currT * points) + 1);
+
+                for (int pi = iStart; pi <= iEnd; pi++) {
+                    double progress = (double) pi / points;
+                    double thetaDeg = -arc / 2.0 + progress * arc;
+                    Vec3d pos = playerArcPoint(origin, forward, right,
+                                               thetaDeg, progress, radius, yOffset, height);
+
+                    // Partículas del arco (mismo estilo que ArcSlashGoal)
+                    serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
+                        pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+                    serverWorld.spawnParticles(ParticleTypes.CRIT,
+                        pos.x, pos.y, pos.z, 3, 0.07, 0.07, 0.07, 0.18);
+                    serverWorld.spawnParticles(ParticleTypes.ENCHANTED_HIT,
+                        pos.x, pos.y, pos.z, 2, 0.07, 0.07, 0.07, 0.12);
+
+                    // Detección de golpe
+                    Box hitBox = new Box(
+                        pos.x - hitRadius, pos.y - hitRadius - 0.5, pos.z - hitRadius,
+                        pos.x + hitRadius, pos.y + hitRadius + 0.5, pos.z + hitRadius);
+
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive() && !alreadyHit.contains(e.getUuid()))) {
+                        victim.damage(player.getDamageSources().playerAttack(player), damage);
+                        alreadyHit.add(victim.getUuid());
+
+                        // Knockback desde el jugador
+                        Vec3d knock = victim.getPos().subtract(origin).normalize();
+                        victim.addVelocity(knock.x * 0.8, 0.35, knock.z * 0.8);
+                        victim.velocityModified = true;
+
+                        // Sonido e impacto de golpe
+                        serverWorld.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
+                            SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1.0f, 0.85f);
+                        serverWorld.spawnParticles(ParticleTypes.CRIT,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            14, 0.4, 0.4, 0.4, 0.25);
+                        serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            1, 0, 0, 0, 0);
+                    }
+                }
+
+                // Flash al final del barrido
+                if (t == duration) {
+                    Vec3d endPos = playerArcPoint(origin, forward, right,
+                        arc / 2.0, 1.0, radius, yOffset, height);
+                    serverWorld.spawnParticles(ParticleTypes.FLASH,
+                        endPos.x, endPos.y, endPos.z, 1, 0, 0, 0, 0);
+                    serverWorld.spawnParticles(ParticleTypes.CRIT,
+                        endPos.x, endPos.y, endPos.z, 8, 0.3, 0.3, 0.3, 0.3);
+                    serverWorld.playSound(null, origin.x, origin.y, origin.z,
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.0f, 1.8f);
+                }
+            });
+        }
+    }
+
+    /**
+     * Calcula un punto en el arco en coordenadas world-space.
+     * Adaptado de ArcSlashGoal#arcPoint para uso por jugadores.
+     *
+     * @param thetaDeg  ángulo en grados desde el centro del arco (-arc/2 a +arc/2)
+     * @param t         progreso normalizado 0→1 a lo largo del arco
+     */
+    private static Vec3d playerArcPoint(Vec3d origin, Vec3d forward, Vec3d right,
+                                        double thetaDeg, double t,
+                                        float radius, float yOffset, float height) {
+        double theta = Math.toRadians(thetaDeg);
+        double hx = origin.x + radius * (Math.cos(theta) * forward.x + Math.sin(theta) * right.x);
+        double hz = origin.z + radius * (Math.cos(theta) * forward.z + Math.sin(theta) * right.z);
+        double vertArc = Math.sin(Math.PI * t); // parabola 0→1→0
+        double hy = origin.y + yOffset + height * vertArc;
+        return new Vec3d(hx, hy, hz);
+    }
 
 }

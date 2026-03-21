@@ -132,6 +132,10 @@ public class ModItems {
 	public static final Item SKYXERN_LEGACY_ARTIFACT = registerItem("skyxern_legacy_artifact",
 			new SkyxernLegacyArtifact(new Item.Settings().maxCount(1).fireproof()));
 
+	// === Moneda del servidor ===
+	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",
+			new Item(new Item.Settings().maxCount(64)));
+
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);
 	}

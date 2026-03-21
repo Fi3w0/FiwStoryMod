@@ -26,7 +26,8 @@ import java.util.List;
 
 public class EspadaCaosArtifact extends BaseArtifactSwordItem {
 	
-	private static final int COOLDOWN_MS = 60000; // 1 minuto
+	private static final int COOLDOWN_MS = 60000; // 1 minuto (Aura del Caos)
+	private static final int ARC_SLASH_COOLDOWN_MS = 8000; // 8 segundos (Arc Slash)
 	private static final int AURA_DURATION_TICKS = 60; // 3 segundos (20 ticks/segundo)
 	private static final int STRENGTH_DURATION_TICKS = 200; // 10 segundos
 	
@@ -148,26 +149,59 @@ public class EspadaCaosArtifact extends BaseArtifactSwordItem {
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
 		ItemStack stack = player.getStackInHand(hand);
-		
+
 		if (world.isClient()) {
 			return TypedActionResult.success(stack, true);
 		}
-		
-		// Verificar cooldown
+
+		// Shift + Click derecho → Arc Slash
+		if (player.isSneaking()) {
+			return activateArcSlash(world, player, stack);
+		}
+
+		// Click derecho → Aura del Caos
 		if (!FiwNBT.isCooldownOver(stack, "ability")) {
 			long remaining = FiwNBT.getCooldownRemaining(stack, "ability");
-			FiwUtils.sendErrorMessage(player, "Habilidad en cooldown: " + 
+			FiwUtils.sendErrorMessage(player, "Aura en cooldown: " +
 				FiwUtils.formatTimeSeconds(remaining / 1000.0));
 			return TypedActionResult.fail(stack);
 		}
-		
-		// Ejecutar habilidad
+
+		// Ejecutar Aura del Caos
 		onArtifactUse(world, player, stack, hand);
-		
+
 		// Registrar uso
 		FiwNBT.incrementUses(stack);
 		FiwNBT.setLong(stack, FiwNBT.LAST_USED, System.currentTimeMillis());
-		
+
+		return TypedActionResult.success(stack, false);
+	}
+
+	private TypedActionResult<ItemStack> activateArcSlash(World world, PlayerEntity player, ItemStack stack) {
+		if (!FiwNBT.isCooldownOver(stack, "arc_slash")) {
+			long remaining = FiwNBT.getCooldownRemaining(stack, "arc_slash");
+			FiwUtils.sendErrorMessage(player, "Arc Slash en cooldown: " +
+				FiwUtils.formatTimeSeconds(remaining / 1000.0));
+			return TypedActionResult.fail(stack);
+		}
+
+		if (!(world instanceof net.minecraft.server.world.ServerWorld serverWorld)) {
+			return TypedActionResult.fail(stack);
+		}
+
+		// Ejecutar Arc Slash
+		FiwEffects.executeArcSlash(serverWorld, player);
+
+		// Mensaje de activación
+		player.sendMessage(net.minecraft.text.Text.literal("§c§l⚔ ARC SLASH ⚔§r"), true);
+
+		// Aplicar cooldown (8 segundos)
+		FiwNBT.setCooldown(stack, "arc_slash", ARC_SLASH_COOLDOWN_MS);
+
+		// Registrar uso
+		FiwNBT.incrementUses(stack);
+		FiwNBT.setLong(stack, FiwNBT.LAST_USED, System.currentTimeMillis());
+
 		return TypedActionResult.success(stack, false);
 	}
 	
@@ -201,12 +235,18 @@ public class EspadaCaosArtifact extends BaseArtifactSwordItem {
 		tooltip.add(Text.literal("§7• Energía caótica contenida§r").formatted(Formatting.GRAY));
 		tooltip.add(Text.literal("§7• Poder destructivo descontrolado§r").formatted(Formatting.GRAY));
 		tooltip.add(Text.literal(""));
+
+		tooltip.add(Text.literal("§c[Click D] §7Aura del Caos §8(60s CD)").formatted(Formatting.GRAY));
+		tooltip.add(Text.literal("§c[Shift+Click D] §7Arc Slash §8(8s CD)").formatted(Formatting.GRAY));
 		
-		// Información de cooldown (solo si está en cooldown)
-		long cooldownRemaining = FiwNBT.getCooldownRemaining(stack, "ability");
-		if (cooldownRemaining > 0) {
-			String cooldownText = "Cooldown: " + FiwUtils.formatTimeSeconds(cooldownRemaining / 1000.0);
-			tooltip.add(Text.literal("§7" + cooldownText + "§r").formatted(Formatting.GRAY));
+		// Información de cooldowns (solo si están activos)
+		long auraCd = FiwNBT.getCooldownRemaining(stack, "ability");
+		long arcCd  = FiwNBT.getCooldownRemaining(stack, "arc_slash");
+		if (auraCd > 0 || arcCd > 0) {
+			if (auraCd > 0)
+				tooltip.add(Text.literal("§7Aura: " + FiwUtils.formatTimeSeconds(auraCd / 1000.0) + "§r").formatted(Formatting.GRAY));
+			if (arcCd > 0)
+				tooltip.add(Text.literal("§7Arc Slash: " + FiwUtils.formatTimeSeconds(arcCd / 1000.0) + "§r").formatted(Formatting.GRAY));
 			tooltip.add(Text.literal(""));
 		}
 		
