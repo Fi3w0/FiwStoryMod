@@ -32,6 +32,11 @@ import com.fiw.fiwstory.item.custom.MK88TabletArtifact;
 import com.fiw.fiwstory.item.custom.BronzeAxiomArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernStoneArtifact;
 import com.fiw.fiwstory.item.custom.SkyxernLegacyArtifact;
+import com.fiw.fiwstory.item.custom.SkyxernCoinItem;
+import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
+import com.fiw.fiwstory.item.custom.EspadaElficaArtifact;
+import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
+import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -131,6 +136,24 @@ public class ModItems {
 
 	public static final Item SKYXERN_LEGACY_ARTIFACT = registerItem("skyxern_legacy_artifact",
 			new SkyxernLegacyArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	// === Espada Mgshtraklar ===
+	public static final Item ESPADA_MGSHTRAKLAR = registerItem("espada_mgshtraklar",
+			new EspadaMgshtraklar(null, 5, -2.4f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Armas v2.1.3 ===
+	public static final Item ESPADA_ELFICA = registerItem("espada_elfica",
+			new EspadaElficaArtifact(null, 10, -2.5f, new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item HACHA_RELAMPAGO = registerItem("hacha_relampago",
+			new HachaRelampagoArtifact(null, 8, -2.6f, new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item ESPADA_FROSTMORN = registerItem("espada_frostmorn",
+			new EspadaFrostmornArtifact(null, 10, -2.4f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Moneda del servidor ===
+	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",
+			new SkyxernCoinItem(new Item.Settings().maxCount(64)));
 
 	private static Item registerItem(String name, Item item) {
 		return Registry.register(Registries.ITEM, new Identifier(FiwstoryMod.MOD_ID, name), item);

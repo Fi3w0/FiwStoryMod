@@ -1,12 +1,16 @@
 package com.fiw.fiwstory.lib;
 
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import org.joml.Vector3f;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -15,9 +19,13 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
@@ -29,6 +37,36 @@ public class FiwEffects {
     
     // Random thread-safe para efectos
     private static final ThreadLocal<Random> RANDOM = ThreadLocal.withInitial(Random::new);
+
+    // ── Tick Scheduler ──────────────────────────────────────────────────────────
+    private static final CopyOnWriteArrayList<ScheduledTask> TASK_QUEUE = new CopyOnWriteArrayList<>();
+    private static boolean tickListenerRegistered = false;
+
+    private static class ScheduledTask {
+        final long runAtMs;
+        final Runnable task;
+        ScheduledTask(long runAtMs, Runnable task) {
+            this.runAtMs = runAtMs;
+            this.task = task;
+        }
+    }
+
+    private static void ensureTickListenerRegistered() {
+        if (!tickListenerRegistered) {
+            tickListenerRegistered = true;
+            ServerTickEvents.END_SERVER_TICK.register(server -> {
+                long now = System.currentTimeMillis();
+                TASK_QUEUE.removeIf(t -> {
+                    if (t == null) return true;
+                    if (t.runAtMs <= now) {
+                        try { t.task.run(); } catch (Exception e) { /* swallow */ }
+                        return true;
+                    }
+                    return false;
+                });
+            });
+        }
+    }
     
     /**
      * Aplica un efecto de estado a una entidad con duración y nivel.
@@ -508,15 +546,23 @@ public class FiwEffects {
         if (player == null || target == null || player.getWorld().isClient()) {
             return;
         }
-        
+
         World world = player.getWorld();
-        
-        // 1. Setup inicial
+        if (!(world instanceof ServerWorld serverWorld)) return;
+
+        // 1. Mensaje de activación
         worldBarrageSetup(player);
-        
-        // 2. Ejecutar slashes rotativos (en secuencia)
-        // Usaremos un sistema de ticks para la secuencia
-        scheduleWorldBarrageSequence(player, target);
+
+        // 2. Teletransporte inmediato detrás del objetivo
+        Vec3d targetLook = target.getRotationVec(1.0f);
+        Vec3d behindPos = target.getPos().subtract(targetLook.multiply(2.0));
+        behindPos = new Vec3d(behindPos.x, target.getY(), behindPos.z);
+        player.requestTeleport(behindPos.x, behindPos.y, behindPos.z);
+        playSoundAtEntity(player, SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
+        spawnParticlesAroundEntity(player, ParticleTypes.DRAGON_BREATH, 25, 1.0);
+
+        // 3. Programar 16 slashes estilo Dismantle (Sukuna)
+        scheduleWorldBarrageSequence(serverWorld, player, target);
     }
     
     /**
@@ -543,36 +589,68 @@ public class FiwEffects {
     }
     
     /**
-     * Programa la secuencia de slashes.
+     * Programa la secuencia de slashes del World Barrage (Dismantle reworked).
+     * 10 ondas × 2 slashes = 20 slashes en 4 segundos. Cada slash es un mini arc visual.
+     * Daño: 7.0f mágico por slash (~140 raw total). En práctica 5-8 conectan → 35-56 daño mágico real.
+     * Daño mágico: ignora armadura del objetivo.
      */
-    private static void scheduleWorldBarrageSequence(PlayerEntity player, LivingEntity target) {
-        World world = player.getWorld();
-        
-        if (world instanceof net.minecraft.server.world.ServerWorld serverWorld) {
-            // Ángulos de rotación para los slashes (12 slashes como en MythicMobs)
-            int[] slashAngles = {0, 30, 60, 90, 120, 150, 180, -30, -60, -90, -120, -150};
-            
-            // Usar un sistema de ticks para programar las tareas
-            for (int i = 0; i < slashAngles.length; i++) {
-                final int angle = slashAngles[i];
-                final int delayTicks = 8 + (i * 3); // 8 ticks inicial + 3 por cada slash
-                
-                // Programar tarea con delay usando el scheduler del server
-                scheduleDelayedTask(serverWorld, delayTicks, () -> {
-                    if (player.isAlive() && target.isAlive()) {
-                        executeRotatingSlash(player, target, angle);
+    private static void scheduleWorldBarrageSequence(ServerWorld serverWorld, PlayerEntity player, LivingEntity target) {
+        final int WAVES = 10;
+        final int SLASHES_PER_WAVE = 2;
+        final int WAVE_DELAY_TICKS = 8; // 0.4s entre ondas → 4s en total
+
+        for (int wave = 0; wave < WAVES; wave++) {
+            final int w = wave;
+            scheduleDelayedTask(serverWorld, w * WAVE_DELAY_TICKS, () -> {
+                if (!player.isAlive() || !target.isAlive()) return;
+
+                Random random = RANDOM.get();
+                Vec3d targetPos = target.getPos();
+
+                for (int s = 0; s < SLASHES_PER_WAVE; s++) {
+                    // Posición aleatoria alrededor del objetivo (±2 bloques)
+                    double ox = (random.nextDouble() * 4.0) - 2.0;
+                    double oz = (random.nextDouble() * 4.0) - 2.0;
+                    Vec3d slashPos = targetPos.add(ox, 0, oz);
+
+                    // Ángulo de roll aleatorio (0-360°) para slashes caóticos y diagonales
+                    double rollDeg = random.nextDouble() * 360.0;
+
+                    // Mini arc slash visual (mismo estilo que Arc Slash de la Espada del Caos)
+                    spawnMiniArcSlash(serverWorld, slashPos, rollDeg);
+
+                    // Sonido por slash con pitch ligeramente aleatorio
+                    serverWorld.playSound(null, slashPos.x, slashPos.y, slashPos.z,
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
+                        0.5f, 0.8f + random.nextFloat() * 0.5f);
+
+                    // Daño: 7.0f mágico por slash (ignora armadura)
+                    Box hitBox = new Box(slashPos.x - 1.5, slashPos.y - 0.3, slashPos.z - 1.5,
+                                        slashPos.x + 1.5, slashPos.y + 2.0, slashPos.z + 1.5);
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive())) {
+                        victim.damage(serverWorld.getDamageSources().magic(), 7.0f);
+                        serverWorld.spawnParticles(ParticleTypes.CRIT,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            8, 0.3, 0.3, 0.3, 0.15);
                     }
-                });
-            }
-            
-            // Programar teletransporte final y daño
-            final int finalDelay = 8 + (slashAngles.length * 3) + 5;
-            scheduleDelayedTask(serverWorld, finalDelay, () -> {
-                if (player.isAlive() && target.isAlive()) {
-                    worldBarrageFinale(player, target);
                 }
             });
         }
+
+        // Tras el último slash: Wither I (4s) + sonido de impacto final
+        scheduleDelayedTask(serverWorld, WAVES * WAVE_DELAY_TICKS + 2, () -> {
+            if (!player.isAlive()) return;
+
+            serverWorld.playSound(null, target.getX(), target.getY(), target.getZ(),
+                SoundEvents.ENTITY_WITHER_AMBIENT, SoundCategory.PLAYERS, 0.5f, 0.6f);
+
+            if (target.isAlive()) {
+                target.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.WITHER, 100, 1, false, true // Wither II, 5 segundos
+                ));
+            }
+        });
     }
     
     /**
@@ -581,9 +659,10 @@ public class FiwEffects {
      * En producción, usaríamos un sistema de tick scheduler.
      */
     private static void scheduleDelayedTask(ServerWorld serverWorld, int delayTicks, Runnable task) {
-        // Ejecutar inmediatamente para testing
-        // En una implementación real, usaríamos serverWorld.getServer().executeDelayed()
-        serverWorld.getServer().execute(task);
+        if (task == null) return;
+        ensureTickListenerRegistered();
+        long delayMs = delayTicks * 50L; // 1 tick = 50ms a 20 TPS
+        TASK_QUEUE.add(new ScheduledTask(System.currentTimeMillis() + delayMs, task));
     }
     
     /**
@@ -831,6 +910,550 @@ public class FiwEffects {
             );
         }
     }
-    
+
+    /**
+     * Genera un mini arc slash visual de 90° centrado en {@code center} con roll aleatorio.
+     * Usa las mismas capas de partículas que el Arc Slash de la Espada del Caos.
+     */
+    private static void spawnMiniArcSlash(ServerWorld world, Vec3d center, double rollDeg) {
+        double rollRad = Math.toRadians(rollDeg);
+        Vec3d fwd   = new Vec3d(Math.cos(rollRad), 0, Math.sin(rollRad));
+        Vec3d right = new Vec3d(-fwd.z, 0, fwd.x);
+
+        final float arc     = 90f;
+        final float radius  = 1.5f;
+        final float yOffset = 0.9f;
+        final float height  = 0.35f;
+        final int   points  = 10;
+
+        for (int pi = 0; pi <= points; pi++) {
+            double progress = (double) pi / points;
+            double thetaDeg = -arc / 2.0 + progress * arc; // -45 a +45
+            Vec3d pos = miniArcPoint(center, fwd, right, thetaDeg, progress, radius, yOffset, height);
+
+            world.spawnParticles(ParticleTypes.SWEEP_ATTACK,   pos.x, pos.y, pos.z, 1, 0,    0,    0,    0);
+            world.spawnParticles(ParticleTypes.CRIT,           pos.x, pos.y, pos.z, 3, 0.05, 0.05, 0.05, 0.15);
+            world.spawnParticles(ParticleTypes.ENCHANTED_HIT,  pos.x, pos.y, pos.z, 2, 0.05, 0.05, 0.05, 0.10);
+            world.spawnParticles(ParticleTypes.LARGE_SMOKE,    pos.x, pos.y, pos.z, 1, 0.05, 0.05, 0.05, 0);
+        }
+    }
+
+    /**
+     * Calcula un punto en el mini arco en coordenadas world-space.
+     * Misma lógica que {@link #playerArcPoint} pero parametrizada para el mini slash.
+     */
+    private static Vec3d miniArcPoint(Vec3d center, Vec3d fwd, Vec3d right,
+                                      double thetaDeg, double t,
+                                      float radius, float yOffset, float height) {
+        double theta = Math.toRadians(thetaDeg);
+        double hx = center.x + radius * (Math.cos(theta) * fwd.x + Math.sin(theta) * right.x);
+        double hz = center.z + radius * (Math.cos(theta) * fwd.z + Math.sin(theta) * right.z);
+        double vertArc = Math.sin(Math.PI * t); // parábola 0→1→0
+        double hy = center.y + yOffset + height * vertArc;
+        return new Vec3d(hx, hy, hz);
+    }
+
+    // ========== HABILIDAD CRIMSON SLASH (ESPADA MGSHTRAKLAR) ==========
+
+    /**
+     * Lanza 3 garras de energía carmesí consecutivas en la dirección del jugador.
+     * Adaptado de CrimsonSlashGoal para uso por jugadores.
+     * Daño: 10.0 por garra (magic, bypass de armadura). Explosión final: 15.0 con falloff.
+     */
+    public static void executeCrimsonSlash(ServerWorld serverWorld, PlayerEntity player) {
+        if (player == null || !player.isAlive()) return;
+
+        Vec3d look = player.getRotationVec(1.0f);
+        final Vec3d clawDir = new Vec3d(look.x, 0, look.z).normalize();
+        final Vec3d startPos = player.getPos().add(0, 0.3, 0);
+
+        final double clawSpeed   = 1.2;  // bloques/tick
+        final int ticksPerClaw   = 10;   // 12 bloques / 1.2 = 10 ticks
+        final int delayBetween   = 10;   // ticks entre garras
+        final float clawDamage   = 10.0f;
+        final float explosionDmg = 15.0f;
+        final float explosionRad = 5.0f;
+        final int clawCount      = 3;
+
+        // Sonido inicial
+        serverWorld.playSound(null, startPos.x, startPos.y, startPos.z,
+            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.5f, 0.6f);
+
+        for (int c = 0; c < clawCount; c++) {
+            final int clawIndex  = c;
+            final double clawSz  = 1.0 + c * 0.5;
+            final int clawStart  = c * delayBetween;
+            final boolean isLast = (c == clawCount - 1);
+
+            // Sonido de lanzamiento para garras 2 y 3
+            if (c > 0) {
+                scheduleDelayedTask(serverWorld, clawStart, () -> {
+                    if (!player.isAlive()) return;
+                    serverWorld.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS,
+                        1.5f, 0.6f + clawIndex * 0.1f);
+                });
+            }
+
+            // Posición mutable de la garra (array de 1 elemento para mutabilidad en lambda)
+            final Vec3d[] clawPos = {startPos};
+            final Set<UUID> hitByThisClaw = new HashSet<>();
+
+            for (int tick = 1; tick <= ticksPerClaw; tick++) {
+                final boolean isLastTick = (tick == ticksPerClaw);
+                scheduleDelayedTask(serverWorld, clawStart + tick, () -> {
+                    if (!player.isAlive()) return;
+
+                    clawPos[0] = clawPos[0].add(clawDir.multiply(clawSpeed));
+                    Vec3d pos = clawPos[0];
+
+                    // Partículas de la garra
+                    spawnCrimsonClawParticles(serverWorld, pos, clawDir, clawSz);
+
+                    // Daño (magic — 10% armor bypass como en el jefe original)
+                    double hw = clawSz * 1.0;
+                    Box hitBox = new Box(pos.x - hw, pos.y - 0.5, pos.z - hw,
+                                        pos.x + hw, pos.y + 2.5, pos.z + hw);
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive() && !hitByThisClaw.contains(e.getUuid()))) {
+                        victim.damage(serverWorld.getDamageSources().magic(), clawDamage);
+                        hitByThisClaw.add(victim.getUuid());
+                    }
+
+                    // Explosión al final de la última garra
+                    if (isLastTick && isLast) {
+                        spawnCrimsonExplosion(serverWorld, pos, explosionRad, explosionDmg, player);
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Partículas de la garra carmesí: suelo + abanico vertical (de CrimsonSlashGoal).
+     */
+    private static void spawnCrimsonClawParticles(ServerWorld world, Vec3d pos, Vec3d clawDir, double clawSize) {
+        Vec3d perp = new Vec3d(-clawDir.z, 0, clawDir.x);
+        double halfWidth = clawSize * 0.8;
+
+        // Rastro en el suelo
+        for (double w = -halfWidth; w <= halfWidth; w += 0.4) {
+            Vec3d p = pos.add(perp.multiply(w));
+            world.spawnParticles(ParticleTypes.CRIT,
+                p.x, p.y + 0.05, p.z, 1, 0.05, 0.0, 0.05, 0.0);
+            world.spawnParticles(new DustParticleEffect(new Vector3f(0.8f, 0.0f, 0.3f), 1.2f),
+                p.x, p.y + 0.1, p.z, 1, 0.05, 0.0, 0.05, 0.0);
+        }
+
+        // Abanico vertical
+        double fanHeight = 1.5 + clawSize * 0.4;
+        for (double h = 0.5; h <= fanHeight; h += 0.4) {
+            world.spawnParticles(new DustParticleEffect(new Vector3f(0.9f, 0.0f, 0.2f), 1.0f),
+                pos.x, pos.y + h, pos.z, 1, 0.05, 0.0, 0.05, 0.0);
+            world.spawnParticles(ParticleTypes.CRIT,
+                pos.x, pos.y + h, pos.z, 1, 0.04, 0.0, 0.04, 0.0);
+        }
+    }
+
+    /**
+     * Explosión carmesí al final del Crimson Slash (de CrimsonSlashGoal.triggerExplosion).
+     */
+    private static void spawnCrimsonExplosion(ServerWorld world, Vec3d pos,
+                                               float radius, float damage, PlayerEntity attacker) {
+        // Visuals
+        world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER,
+            pos.x, pos.y, pos.z, 2, 0.3, 0.3, 0.3, 0.0);
+        double fs = radius * 0.4;
+        world.spawnParticles(ParticleTypes.FLAME,
+            pos.x, pos.y, pos.z, 50, fs, radius * 0.5, fs, 0.15);
+        world.spawnParticles(new DustParticleEffect(new Vector3f(0.7f, 0.0f, 0.2f), 2.0f),
+            pos.x, pos.y, pos.z, 30, radius * 0.3, radius * 0.3, radius * 0.3, 0.0);
+        world.spawnParticles(ParticleTypes.LAVA,
+            pos.x, pos.y, pos.z, 15, radius * 0.2, radius * 0.2, radius * 0.2, 0.0);
+
+        // Anillos de FLAME ascendentes
+        for (double h = 0; h <= radius; h += 0.5) {
+            double ringR = radius * Math.sin(Math.PI * h / radius);
+            int N = Math.max(4, (int)(ringR * 4));
+            for (int i = 0; i < N; i++) {
+                double angle = Math.toRadians(360.0 / N * i);
+                world.spawnParticles(ParticleTypes.FLAME,
+                    pos.x + Math.cos(angle) * ringR, pos.y + h, pos.z + Math.sin(angle) * ringR,
+                    1, 0.05, 0.05, 0.05, 0.0);
+            }
+        }
+
+        // Sonidos
+        world.playSound(null, pos.x, pos.y, pos.z,
+            SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.PLAYERS, 2.0f, 0.7f);
+        world.playSound(null, pos.x, pos.y, pos.z,
+            SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.PLAYERS, 1.2f, 0.5f);
+
+        // Daño con falloff por distancia
+        Box blastBox = new Box(pos.x - radius, pos.y - radius, pos.z - radius,
+                               pos.x + radius, pos.y + radius, pos.z + radius);
+        for (LivingEntity victim : world.getEntitiesByClass(LivingEntity.class, blastBox,
+                e -> e != attacker && e.isAlive())) {
+            double dist = victim.getPos().distanceTo(pos);
+            if (dist > radius) continue;
+            float falloff = (float)(1.0 - dist / radius);
+            victim.damage(world.getDamageSources().magic(), damage * falloff);
+            Vec3d knock = victim.getPos().subtract(pos).normalize().multiply(1.8 * falloff);
+            victim.addVelocity(knock.x, 0.8 * falloff, knock.z);
+            victim.velocityModified = true;
+        }
+    }
+
+    // ========== HABILIDAD ARC SLASH (ESPADA DEL CAOS) ==========
+
+    /**
+     * Ejecuta el Arc Slash — barre un arco de 180° frente al jugador en 6 ticks.
+     * Daño: 8.0 por entidad (cada entidad solo golpeada una vez por slash).
+     * Adaptado de ArcSlashGoal para uso por jugadores.
+     */
+    public static void executeArcSlash(ServerWorld serverWorld, PlayerEntity player) {
+        if (player == null || !player.isAlive()) return;
+
+        final float arc = 180f;
+        final float radius = 4.0f;
+        final float damage = 8.0f;
+        final int duration = 6;
+        final int points = 28;
+        final float yOffset = 1.1f;
+        final float height = 0.8f;
+        final float hitRadius = 1.0f;
+
+        // Bloquear orientación al inicio del slash
+        Vec3d fwd = player.getRotationVec(1.0f);
+        final Vec3d forward = new Vec3d(fwd.x, 0, fwd.z).normalize();
+        final Vec3d right = new Vec3d(-forward.z, 0, forward.x);
+        final Vec3d origin = player.getPos();
+
+        // Set de entidades ya golpeadas (compartido entre ticks del barrido)
+        Set<UUID> alreadyHit = new HashSet<>();
+
+        // Sonido de inicio del slash
+        serverWorld.playSound(null, origin.x, origin.y, origin.z,
+            SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.5f, 0.85f);
+
+        // Programar cada tick del barrido
+        for (int tick = 1; tick <= duration; tick++) {
+            final int t = tick;
+            scheduleDelayedTask(serverWorld, tick, () -> {
+                if (!player.isAlive()) return;
+
+                double prevT = (double)(t - 1) / duration;
+                double currT = (double) t / duration;
+                int iStart = (int)(prevT * points);
+                int iEnd   = Math.min(points, (int)(currT * points) + 1);
+
+                for (int pi = iStart; pi <= iEnd; pi++) {
+                    double progress = (double) pi / points;
+                    double thetaDeg = -arc / 2.0 + progress * arc;
+                    Vec3d pos = playerArcPoint(origin, forward, right,
+                                               thetaDeg, progress, radius, yOffset, height);
+
+                    // Partículas del arco (mismo estilo que ArcSlashGoal)
+                    serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
+                        pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
+                    serverWorld.spawnParticles(ParticleTypes.CRIT,
+                        pos.x, pos.y, pos.z, 3, 0.07, 0.07, 0.07, 0.18);
+                    serverWorld.spawnParticles(ParticleTypes.ENCHANTED_HIT,
+                        pos.x, pos.y, pos.z, 2, 0.07, 0.07, 0.07, 0.12);
+
+                    // Detección de golpe
+                    Box hitBox = new Box(
+                        pos.x - hitRadius, pos.y - hitRadius - 0.5, pos.z - hitRadius,
+                        pos.x + hitRadius, pos.y + hitRadius + 0.5, pos.z + hitRadius);
+
+                    for (LivingEntity victim : serverWorld.getEntitiesByClass(LivingEntity.class, hitBox,
+                            e -> e != player && e.isAlive() && !alreadyHit.contains(e.getUuid()))) {
+                        victim.damage(player.getDamageSources().playerAttack(player), damage);
+                        alreadyHit.add(victim.getUuid());
+
+                        // Knockback desde el jugador
+                        Vec3d knock = victim.getPos().subtract(origin).normalize();
+                        victim.addVelocity(knock.x * 0.8, 0.35, knock.z * 0.8);
+                        victim.velocityModified = true;
+
+                        // Sonido e impacto de golpe
+                        serverWorld.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
+                            SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, SoundCategory.PLAYERS, 1.0f, 0.85f);
+                        serverWorld.spawnParticles(ParticleTypes.CRIT,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            14, 0.4, 0.4, 0.4, 0.25);
+                        serverWorld.spawnParticles(ParticleTypes.SWEEP_ATTACK,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2, victim.getZ(),
+                            1, 0, 0, 0, 0);
+                    }
+                }
+
+                // Flash al final del barrido
+                if (t == duration) {
+                    Vec3d endPos = playerArcPoint(origin, forward, right,
+                        arc / 2.0, 1.0, radius, yOffset, height);
+                    serverWorld.spawnParticles(ParticleTypes.FLASH,
+                        endPos.x, endPos.y, endPos.z, 1, 0, 0, 0, 0);
+                    serverWorld.spawnParticles(ParticleTypes.CRIT,
+                        endPos.x, endPos.y, endPos.z, 8, 0.3, 0.3, 0.3, 0.3);
+                    serverWorld.playSound(null, origin.x, origin.y, origin.z,
+                        SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1.0f, 1.8f);
+                }
+            });
+        }
+    }
+
+    /**
+     * Calcula un punto en el arco en coordenadas world-space.
+     * Adaptado de ArcSlashGoal#arcPoint para uso por jugadores.
+     *
+     * @param thetaDeg  ángulo en grados desde el centro del arco (-arc/2 a +arc/2)
+     * @param t         progreso normalizado 0→1 a lo largo del arco
+     */
+    private static Vec3d playerArcPoint(Vec3d origin, Vec3d forward, Vec3d right,
+                                        double thetaDeg, double t,
+                                        float radius, float yOffset, float height) {
+        double theta = Math.toRadians(thetaDeg);
+        double hx = origin.x + radius * (Math.cos(theta) * forward.x + Math.sin(theta) * right.x);
+        double hz = origin.z + radius * (Math.cos(theta) * forward.z + Math.sin(theta) * right.z);
+        double vertArc = Math.sin(Math.PI * t); // parabola 0→1→0
+        double hy = origin.y + yOffset + height * vertArc;
+        return new Vec3d(hx, hy, hz);
+    }
+
+    // ========== CHAIN LIGHTNING (Espada Elfica) ==========
+
+    /**
+     * Fires a chain lightning from the player in their look direction.
+     * Hits up to 3 targets, chaining to the nearest unvisited entity each bounce.
+     * The caster is immune (skipped). Each target receives a cosmetic lightning bolt + ELECTRIC_SPARK arc.
+     */
+    public static void executeChainLightning(ServerWorld world, PlayerEntity caster) {
+        Vec3d look = caster.getRotationVec(1.0f);
+        float radius = 12.0f;
+        int maxChain = 3;
+        float damage = 10.0f;
+
+        Box searchBox = Box.of(caster.getPos(), radius * 2, radius * 2, radius * 2);
+        List<LivingEntity> candidates = world.getEntitiesByClass(LivingEntity.class, searchBox,
+            e -> e != caster && e.isAlive()
+                && e.squaredDistanceTo(caster) <= (double) radius * radius);
+
+        if (candidates.isEmpty()) return;
+
+        // Sort by distance from caster
+        candidates.sort((a, b) -> Double.compare(a.squaredDistanceTo(caster), b.squaredDistanceTo(caster)));
+
+        // First target: nearest entity in the forward hemisphere
+        LivingEntity first = null;
+        for (LivingEntity c : candidates) {
+            Vec3d toTarget = c.getPos().subtract(caster.getPos()).normalize();
+            if (toTarget.dotProduct(look) > 0) {
+                first = c;
+                break;
+            }
+        }
+        if (first == null) return;
+
+        // Build chain via nearest-unvisited bounce
+        List<LivingEntity> chain = new ArrayList<>();
+        Set<UUID> visited = new HashSet<>();
+        chain.add(first);
+        visited.add(first.getUuid());
+
+        for (int i = 0; i < maxChain - 1 && chain.size() < candidates.size(); i++) {
+            LivingEntity last = chain.get(chain.size() - 1);
+            LivingEntity next = null;
+            double best = Double.MAX_VALUE;
+            for (LivingEntity c : candidates) {
+                if (visited.contains(c.getUuid())) continue;
+                double d = c.squaredDistanceTo(last);
+                if (d < best) { best = d; next = c; }
+            }
+            if (next != null) {
+                chain.add(next);
+                visited.add(next.getUuid());
+            }
+        }
+
+        world.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
+            SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 1.0f, 1.0f);
+
+        // Strike each target, drawing jagged arc from the previous link
+        LivingEntity prev = caster;
+        for (LivingEntity entity : chain) {
+            Vec3d from = new Vec3d(prev.getX(), prev.getY() + prev.getHeight() * 0.8, prev.getZ());
+            Vec3d to   = new Vec3d(entity.getX(), entity.getY() + entity.getHeight() * 0.8, entity.getZ());
+
+            // Jagged ELECTRIC_SPARK particle arc
+            int steps = (int)(from.distanceTo(to) * 4);
+            for (int s = 0; s <= steps; s++) {
+                double frac = (steps == 0) ? 0.0 : (double) s / steps;
+                Random rnd = RANDOM.get();
+                double jx = (rnd.nextDouble() - 0.5) * 0.5;
+                double jy = (rnd.nextDouble() - 0.5) * 0.5;
+                double jz = (rnd.nextDouble() - 0.5) * 0.5;
+                world.spawnParticles(ParticleTypes.ELECTRIC_SPARK,
+                    from.x + (to.x - from.x) * frac + jx,
+                    from.y + (to.y - from.y) * frac + jy,
+                    from.z + (to.z - from.z) * frac + jz,
+                    1, 0, 0, 0, 0);
+            }
+
+            // Damage (armor-bypassing magic)
+            entity.damage(world.getDamageSources().magic(), damage);
+
+            // Cosmetic lightning bolt (no fire, no mob conversion)
+            LightningEntity bolt = new LightningEntity(EntityType.LIGHTNING_BOLT, world);
+            bolt.setCosmetic(true);
+            bolt.setPosition(entity.getX(), entity.getY(), entity.getZ());
+            world.spawnEntity(bolt);
+
+            // Impact ELECTRIC_SPARK burst
+            world.spawnParticles(ParticleTypes.ELECTRIC_SPARK,
+                entity.getX(), entity.getY() + entity.getHeight() / 2.0, entity.getZ(),
+                15, 0.4, 0.4, 0.4, 0.12);
+
+            prev = entity;
+        }
+    }
+
+    // ========== FROST BEAM (EspadaFrostmorn) ==========
+
+    /**
+     * Fires a frost beam in the player's current look direction.
+     * Windup: 10 ticks (0.5s) with gathering ice particles and elder guardian sound.
+     * Beam: 30 ticks (1.5s) locked to fire direction; SNOWFLAKE + END_ROD particles.
+     * Entities hit every 3 ticks take 1.0 magic damage and are frozen (Slowness 127 + Mining Fatigue).
+     * Player is immobilized during beam firing.
+     */
+    public static void executeFrostBeam(ServerWorld world, PlayerEntity player) {
+        Vec3d origin = player.getEyePos();
+        Vec3d dir    = player.getRotationVec(1.0f).normalize();
+        double beamLen = 15.0;
+        float beamWidth = 0.9f;
+        Vec3d dest = origin.add(dir.multiply(beamLen));
+
+        // Windup sound
+        world.playSound(null, player.getX(), player.getY(), player.getZ(),
+            SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, SoundCategory.PLAYERS, 0.8f, 1.0f);
+
+        // Windup particles (10 ticks): ice spiraling inward to origin
+        for (int t = 0; t < 10; t++) {
+            final int tick = t;
+            scheduleDelayedTask(world, tick, () -> {
+                if (!player.isAlive()) return;
+                double progress = tick / 10.0;
+                double gatherRadius = 1.5 * (1.0 - progress);
+                for (int i = 0; i < 4; i++) {
+                    double angle = Math.toRadians(i * 90.0 + tick * 20.0);
+                    world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                        origin.x + Math.cos(angle) * gatherRadius,
+                        origin.y + Math.sin(angle) * gatherRadius * 0.4,
+                        origin.z + Math.sin(angle) * gatherRadius,
+                        1, 0, 0, 0, 0);
+                }
+                world.spawnParticles(ParticleTypes.END_ROD,
+                    origin.x, origin.y, origin.z,
+                    1 + (int)(progress * 3), 0.06, 0.06, 0.06, 0.0);
+            });
+        }
+
+        // Freeze player at beam start
+        scheduleDelayedTask(world, 10, () -> {
+            if (player.isAlive()) {
+                player.addStatusEffect(new StatusEffectInstance(
+                    StatusEffects.SLOWNESS, 30, 200, false, false));
+            }
+        });
+
+        // Beam ticks (ticks 10–39 inclusive = 30 ticks of beam)
+        for (int t = 0; t < 30; t++) {
+            final int beamTick = t;
+            scheduleDelayedTask(world, 10 + t, () -> {
+                if (!player.isAlive()) return;
+
+                // Outer SNOWFLAKE layer (sparse, slight spread)
+                int outerSteps = (int)(beamLen * 3);
+                for (int s = 0; s <= outerSteps; s++) {
+                    double tl = (double) s / outerSteps;
+                    world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                        origin.x + dir.x * beamLen * tl,
+                        origin.y + dir.y * beamLen * tl,
+                        origin.z + dir.z * beamLen * tl,
+                        1, 0.08, 0.08, 0.08, 0.0);
+                }
+
+                // Inner END_ROD core (dense, zero spread — solid beam look)
+                int coreSteps = (int)(beamLen * 7);
+                for (int s = 0; s <= coreSteps; s++) {
+                    double tl = (double) s / coreSteps;
+                    world.spawnParticles(ParticleTypes.END_ROD,
+                        origin.x + dir.x * beamLen * tl,
+                        origin.y + dir.y * beamLen * tl,
+                        origin.z + dir.z * beamLen * tl,
+                        1, 0, 0, 0, 0);
+                }
+
+                // Muzzle flash
+                world.spawnParticles(ParticleTypes.FLASH, origin.x, origin.y, origin.z, 1, 0, 0, 0, 0);
+
+                // Impact burst at beam endpoint
+                world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                    dest.x, dest.y, dest.z, 4, 0.25, 0.25, 0.25, 0.0);
+
+                // Looping beam hum every 8 ticks
+                if (beamTick % 8 == 0) {
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        SoundEvents.ENTITY_GUARDIAN_ATTACK, SoundCategory.PLAYERS, 0.5f, 0.9f);
+                }
+
+                // Damage check every 3 ticks
+                if (beamTick % 3 == 0) {
+                    Box broad = new Box(
+                        Math.min(origin.x, dest.x) - beamWidth, Math.min(origin.y, dest.y) - 1.5,
+                        Math.min(origin.z, dest.z) - beamWidth,
+                        Math.max(origin.x, dest.x) + beamWidth, Math.max(origin.y, dest.y) + 1.5,
+                        Math.max(origin.z, dest.z) + beamWidth);
+                    List<LivingEntity> victims = world.getEntitiesByClass(LivingEntity.class, broad,
+                        e -> e != player && e.isAlive() && isOnBeam(
+                            new Vec3d(e.getX(), e.getY() + e.getHeight() / 2.0, e.getZ()),
+                            origin, dir, beamLen, beamWidth));
+                    for (LivingEntity victim : victims) {
+                        victim.damage(world.getDamageSources().magic(), 1.0f);
+                        // Freeze: Slowness 127 + Mining Fatigue II for 3 seconds
+                        victim.addStatusEffect(new StatusEffectInstance(
+                            StatusEffects.SLOWNESS, 60, 127, false, false));
+                        victim.addStatusEffect(new StatusEffectInstance(
+                            StatusEffects.MINING_FATIGUE, 60, 1, false, false));
+                        // Freeze particle burst on hit
+                        world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2.0, victim.getZ(),
+                            5, 0.3, 0.3, 0.3, 0.0);
+                        world.spawnParticles(ParticleTypes.CLOUD,
+                            victim.getX(), victim.getY() + victim.getHeight() / 2.0, victim.getZ(),
+                            2, 0.3, 0.3, 0.3, 0.0);
+                    }
+                }
+            });
+        }
+
+        // Beam shutdown: glass break sound + snowflake burst
+        scheduleDelayedTask(world, 40, () -> {
+            world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.PLAYERS, 0.8f, 1.0f);
+            world.spawnParticles(ParticleTypes.SNOWFLAKE,
+                origin.x, origin.y, origin.z, 15, 0.3, 0.3, 0.3, 0.1);
+        });
+    }
+
+    /** Returns true if point is within beamWidth of the beam line segment [origin, origin + dir*len]. */
+    private static boolean isOnBeam(Vec3d point, Vec3d origin, Vec3d dir, double len, float width) {
+        Vec3d toPoint = point.subtract(origin);
+        double proj = toPoint.dotProduct(dir);
+        if (proj < 0 || proj > len) return false;
+        Vec3d closest = origin.add(dir.multiply(proj));
+        return closest.squaredDistanceTo(point) <= (double) width * width;
+    }
 
 }

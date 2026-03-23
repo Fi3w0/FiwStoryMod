@@ -1,6 +1,8 @@
 package com.fiw.fiwstory.lib;
 
+import com.fiw.fiwstory.lib.TrinketHelper;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -389,6 +391,26 @@ public class FiwUtils {
         return formatTimeSeconds(ticksToSeconds(ticks));
     }
     
+    /**
+     * Verifica si un jugador tiene un item de una clase específica en cualquier ubicación:
+     * inventario principal, offhand, trinkets y ender chest.
+     */
+    public static boolean hasItemAnywhere(PlayerEntity player, Class<? extends Item> itemClass) {
+        // Inventario principal (36 slots + armor + offhand = 41)
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            if (itemClass.isInstance(player.getInventory().getStack(i).getItem())) return true;
+        }
+        // Offhand (ya cubierto por getInventory() pero explícito)
+        if (itemClass.isInstance(player.getOffHandStack().getItem())) return true;
+        // Trinkets
+        if (TrinketHelper.hasArtifactOfType(player, itemClass)) return true;
+        // Ender chest
+        for (int i = 0; i < player.getEnderChestInventory().size(); i++) {
+            if (itemClass.isInstance(player.getEnderChestInventory().getStack(i).getItem())) return true;
+        }
+        return false;
+    }
+
     /**
      * Capitaliza la primera letra de un string.
      */

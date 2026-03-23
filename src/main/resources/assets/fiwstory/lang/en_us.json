@@ -105,5 +105,16 @@
   "item.fiwstory.skyxern_legacy_artifact": "Skyxern Legacy Fragment",
   "item.fiwstory.skyxern_legacy_artifact.tooltip.line1": "Fragment of the first firmament that saw this world be born",
   "item.fiwstory.skyxern_legacy_artifact.tooltip.line2": "Ascent of the Legacy: +speed +dmg 6s (90s CD) | Passive: 1 heart/10s",
-  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Legendary Artifact - Accessory"
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Legendary Artifact - Accessory",
+
+  "item.fiwstory.espada_mgshtraklar": "Mgshtraklar Sword",
+
+  "item.fiwstory.skyxern_coin": "Skyxern Coin",
+  "item.fiwstory.skyxern_coin.tooltip.line1": "Currency of the Skyxern SMP",
+  "item.fiwstory.skyxern_coin.tooltip.line2": "Used in shops and the casino",
+  "item.fiwstory.skyxern_coin.tooltip.line3": "Server Economy Item",
+
+  "item.fiwstory.espada_elfica": "Royal Elf Sword",
+  "item.fiwstory.hacha_relampago": "Thunder Axe",
+  "item.fiwstory.espada_frostmorn": "FrostMorn"
 }

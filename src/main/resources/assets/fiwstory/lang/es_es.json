@@ -94,5 +94,16 @@
   "item.fiwstory.skyxern_legacy_artifact": "Fragmento del Legado Skyxern",
   "item.fiwstory.skyxern_legacy_artifact.tooltip.line1": "Fragmento del primer firmamento que vio nacer este mundo",
   "item.fiwstory.skyxern_legacy_artifact.tooltip.line2": "Ascenso del Legado: vel+15% | dmg+15% | 6s (90s CD) | Pasiva: 1♥/10s",
-  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Artefacto Legendario - Accesorio"
+  "item.fiwstory.skyxern_legacy_artifact.tooltip.line3": "Artefacto Legendario - Accesorio",
+
+  "item.fiwstory.espada_mgshtraklar": "Espada Mgshtraklar",
+
+  "item.fiwstory.skyxern_coin": "Moneda de Skyxern",
+  "item.fiwstory.skyxern_coin.tooltip.line1": "Moneda del servidor Skyxern SMP",
+  "item.fiwstory.skyxern_coin.tooltip.line2": "Usada en tiendas y el casino",
+  "item.fiwstory.skyxern_coin.tooltip.line3": "Ítem de economía del servidor",
+
+  "item.fiwstory.espada_elfica": "Espada de Elfo Real",
+  "item.fiwstory.hacha_relampago": "Hacha de Relámpago",
+  "item.fiwstory.espada_frostmorn": "FrostMorn"
 }
