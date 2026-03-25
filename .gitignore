@@ -17,7 +17,7 @@ out/
 # OS
 .DS_Store
 Thumbs.db
-
+.claude/
 # Minecraft
 run/
 eclipse/
@@ -37,3 +37,4 @@ gradle.properties.local
 remappedSrc/
 remappedBin/gradle-wrapper.zip
 gradle-wrapper.zip
+/textures/

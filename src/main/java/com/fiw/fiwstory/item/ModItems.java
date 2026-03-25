@@ -37,6 +37,7 @@ import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
 import com.fiw.fiwstory.item.custom.EspadaElficaArtifact;
 import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
+import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -136,6 +137,9 @@ public class ModItems {
 
 	public static final Item SKYXERN_LEGACY_ARTIFACT = registerItem("skyxern_legacy_artifact",
 			new SkyxernLegacyArtifact(new Item.Settings().maxCount(1).fireproof()));
+
+	public static final Item PUFFERFISH_ARTIFACT = registerItem("pufferfish_artifact",
+			new PufferfishArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	// === Espada Mgshtraklar ===
 	public static final Item ESPADA_MGSHTRAKLAR = registerItem("espada_mgshtraklar",

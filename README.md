@@ -2,7 +2,7 @@
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.92.7-blue.svg)](https://fabricmc.net/)
-[![Versión](https://img.shields.io/badge/Versión-2.1.2-orange.svg)](https://github.com/Fi3w0/FiwStoryMod)
+[![Versión](https://img.shields.io/badge/Versión-2.1.4-orange.svg)](https://github.com/Fi3w0/FiwStoryMod)
 [![Idioma](https://img.shields.io/badge/Idioma-Español-red.svg)](https://github.com/Fi3w0/FiwStoryMod)
 [![Licencia](https://img.shields.io/badge/Licencia-CC--BY--NC--SA--4.0-lightgrey.svg)](LICENSE)
 
@@ -79,6 +79,12 @@ Artefactos legendarios pertenecientes al lore del Dios Faraón. Se equipan en sl
 | **GD42 Quantum** | Quantum Anchor — ancla cuántica temporal |
 | **MK88 Tablet** | Emergency Recovery Module — recuperación de emergencia |
 | **Bronze Axiom-7** | Combustion Core — ignición al golpear |
+
+### Artefactos del Abismo
+
+| Artefacto | Rareza | Habilidades |
+|---|---|---|
+| **Globo del Abismo** | Épico | **Represalia Tóxica** — el atacante recibe Veneno I + Lentitud I al golpearte (CD: 5s); **Marea Venenosa** — ola tóxica de 6 bloques (8 en agua), Veneno I + Lentitud I a todo lo cercano (CD: 45s) — `+3 armadura, +2 ATK, +10% KB resist.` |
 
 ### Armas
 
