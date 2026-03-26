@@ -41,6 +41,7 @@ import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
+import com.fiw.fiwstory.item.custom.YarimNecklaceArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -85,6 +86,7 @@ public class FiwstoryMod implements ModInitializer {
 		entries.add(ModItems.SKYXERN_STONE_ARTIFACT);
 		entries.add(ModItems.SKYXERN_LEGACY_ARTIFACT);
 		entries.add(ModItems.PUFFERFISH_ARTIFACT);
+		entries.add(ModItems.YARIM_NECKLACE);
 		entries.add(ModItems.ESPADA_MGSHTRAKLAR);
 		entries.add(ModItems.ESPADA_ELFICA);
 		entries.add(ModItems.HACHA_RELAMPAGO);
@@ -121,6 +123,7 @@ public class FiwstoryMod implements ModInitializer {
 		registerTrinket(ModItems.SKYXERN_STONE_ARTIFACT);
 		registerTrinket(ModItems.SKYXERN_LEGACY_ARTIFACT);
 		registerTrinket(ModItems.PUFFERFISH_ARTIFACT);
+		registerTrinket(ModItems.YARIM_NECKLACE);
 
 		// Registrar items que causan corrupción
 		com.fiw.fiwstory.data.CorruptionData.registerCorruptItem(ModItems.CURSED_SPEAR_OF_FI3W0);
@@ -142,6 +145,7 @@ public class FiwstoryMod implements ModInitializer {
 		HachaRelampagoArtifact.registerDamageEvents();
 		PufferfishArtifact.registerDamageEvents();
 		HojaDeLaPurgaArtifact.registerDamageEvents();
+		YarimNecklaceArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

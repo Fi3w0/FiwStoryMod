@@ -39,6 +39,7 @@ import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
+import com.fiw.fiwstory.item.custom.YarimNecklaceArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -155,6 +156,10 @@ public class ModItems {
 
 	public static final Item ESPADA_FROSTMORN = registerItem("espada_frostmorn",
 			new EspadaFrostmornArtifact(null, 10, -2.4f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Sello del Cazador ===
+	public static final Item YARIM_NECKLACE = registerItem("yarim_necklace",
+			new YarimNecklaceArtifact(new Item.Settings().maxCount(1).fireproof()));
 
 	// === Hoja de la Purga ===
 	public static final Item HOJA_DE_LA_PURGA = registerItem("hoja_de_la_purga",
