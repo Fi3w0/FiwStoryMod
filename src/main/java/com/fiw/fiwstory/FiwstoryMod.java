@@ -39,6 +39,7 @@ import com.fiw.fiwstory.item.custom.EscarabajoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaElficaArtifact;
 import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
+import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
@@ -88,6 +89,7 @@ public class FiwstoryMod implements ModInitializer {
 		entries.add(ModItems.ESPADA_ELFICA);
 		entries.add(ModItems.HACHA_RELAMPAGO);
 		entries.add(ModItems.ESPADA_FROSTMORN);
+		entries.add(ModItems.HOJA_DE_LA_PURGA);
 		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
@@ -139,6 +141,7 @@ public class FiwstoryMod implements ModInitializer {
 		EscarabajoArtifact.registerDamageEvents();
 		HachaRelampagoArtifact.registerDamageEvents();
 		PufferfishArtifact.registerDamageEvents();
+		HojaDeLaPurgaArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

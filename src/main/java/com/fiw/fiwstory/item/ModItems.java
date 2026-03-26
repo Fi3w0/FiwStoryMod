@@ -37,6 +37,7 @@ import com.fiw.fiwstory.item.custom.EspadaMgshtraklar;
 import com.fiw.fiwstory.item.custom.EspadaElficaArtifact;
 import com.fiw.fiwstory.item.custom.HachaRelampagoArtifact;
 import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
+import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
@@ -154,6 +155,10 @@ public class ModItems {
 
 	public static final Item ESPADA_FROSTMORN = registerItem("espada_frostmorn",
 			new EspadaFrostmornArtifact(null, 10, -2.4f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Hoja de la Purga ===
+	public static final Item HOJA_DE_LA_PURGA = registerItem("hoja_de_la_purga",
+			new HojaDeLaPurgaArtifact(null, 11, -2.4f, new Item.Settings().maxCount(1).fireproof()));
 
 	// === Moneda del servidor ===
 	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",
