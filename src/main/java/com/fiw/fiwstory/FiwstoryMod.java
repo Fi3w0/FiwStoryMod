@@ -42,6 +42,7 @@ import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import com.fiw.fiwstory.item.custom.YarimNecklaceArtifact;
+import com.fiw.fiwstory.item.custom.VerdugoDeTronoArtifact;
 import com.fiw.fiwstory.event.SoulboundDeathHandler;
 import com.fiw.fiwstory.item.ModItems;
 import com.fiw.fiwstory.particles.VoidParticles;
@@ -92,6 +93,7 @@ public class FiwstoryMod implements ModInitializer {
 		entries.add(ModItems.HACHA_RELAMPAGO);
 		entries.add(ModItems.ESPADA_FROSTMORN);
 		entries.add(ModItems.HOJA_DE_LA_PURGA);
+		entries.add(ModItems.VERDUGO_DE_TRONO);
 		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
@@ -146,6 +148,7 @@ public class FiwstoryMod implements ModInitializer {
 		PufferfishArtifact.registerDamageEvents();
 		HojaDeLaPurgaArtifact.registerDamageEvents();
 		YarimNecklaceArtifact.registerDamageEvents();
+		VerdugoDeTronoArtifact.registerDamageEvents();
 
 		ModEvents.registerServerEvents();
 		AmethystDropEvent.register();

@@ -40,6 +40,7 @@ import com.fiw.fiwstory.item.custom.EspadaFrostmornArtifact;
 import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import com.fiw.fiwstory.item.custom.YarimNecklaceArtifact;
+import com.fiw.fiwstory.item.custom.VerdugoDeTronoArtifact;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -164,6 +165,10 @@ public class ModItems {
 	// === Hoja de la Purga ===
 	public static final Item HOJA_DE_LA_PURGA = registerItem("hoja_de_la_purga",
 			new HojaDeLaPurgaArtifact(null, 11, -2.4f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Verdugo del Trono ===
+	public static final Item VERDUGO_DE_TRONO = registerItem("verdugo_de_trono",
+			new VerdugoDeTronoArtifact(null, 14, -3.2f, new Item.Settings().maxCount(1).fireproof()));
 
 	// === Moneda del servidor ===
 	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",
