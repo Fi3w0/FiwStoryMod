@@ -350,7 +350,7 @@ public class HojaDeLaPurgaArtifact extends BaseArtifactSwordItem {
         tooltip.add(Text.literal("§8«La inmortalidad es solo una promesa que esta hoja no respeta»§r"));
     }
 
-    @Override public boolean hasGlint(ItemStack stack)          { return true; }
+    @Override public boolean hasGlint(ItemStack stack)          { return false; }
     @Override public boolean isEnchantable(ItemStack stack)     { return false; }
     @Override public boolean isDamageable()                     { return true; }
 
