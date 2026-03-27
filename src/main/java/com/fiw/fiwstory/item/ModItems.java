@@ -41,6 +41,7 @@ import com.fiw.fiwstory.item.custom.HojaDeLaPurgaArtifact;
 import com.fiw.fiwstory.item.custom.PufferfishArtifact;
 import com.fiw.fiwstory.item.custom.YarimNecklaceArtifact;
 import com.fiw.fiwstory.item.custom.VerdugoDeTronoArtifact;
+import com.fiw.fiwstory.item.custom.AncientKeyItem;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolMaterial;
@@ -169,6 +170,10 @@ public class ModItems {
 	// === Verdugo del Trono ===
 	public static final Item VERDUGO_DE_TRONO = registerItem("verdugo_de_trono",
 			new VerdugoDeTronoArtifact(null, 14, -3.2f, new Item.Settings().maxCount(1).fireproof()));
+
+	// === Llave Antigua ===
+	public static final Item ANCIENT_KEY = registerItem("ancient_key",
+			new AncientKeyItem(new Item.Settings().maxCount(1).fireproof()));
 
 	// === Moneda del servidor ===
 	public static final Item SKYXERN_COIN = registerItem("skyxern_coin",

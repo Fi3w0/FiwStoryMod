@@ -94,6 +94,7 @@ public class FiwstoryMod implements ModInitializer {
 		entries.add(ModItems.ESPADA_FROSTMORN);
 		entries.add(ModItems.HOJA_DE_LA_PURGA);
 		entries.add(ModItems.VERDUGO_DE_TRONO);
+		entries.add(ModItems.ANCIENT_KEY);
 		entries.add(ModItems.SKYXERN_COIN);
 			})
 			.build();
